@@ -1,9 +1,16 @@
 import ToolLayout from '../../components/ToolLayout'
 import FAQ from '../../components/FAQ'
 import RelatedTools from '../../components/RelatedTools'
+import {useRouter} from 'next/router'
 import {useState} from 'react'
+import {defaultLocale, getPageTitle, getToolTranslation, getTranslation} from '../../lib/i18n'
 
 export default function BMI(){
+  const router = useRouter()
+  const locale = router.locale || defaultLocale
+  const title = getToolTranslation(locale, 'bmi-calculator', 'title')
+  const description = getToolTranslation(locale, 'bmi-calculator', 'description')
+
   const [weight, setWeight] = useState('')
   const [height, setHeight] = useState('')
   const [result, setResult] = useState(null)
@@ -14,48 +21,50 @@ export default function BMI(){
     const h = parseFloat(height) / 100
     if (!w || !h) return
     const bmi = w / (h*h)
-    let cat = 'Unknown'
-    if (bmi < 18.5) cat = 'Underweight'
-    else if (bmi < 25) cat = 'Normal'
-    else if (bmi < 30) cat = 'Overweight'
-    else cat = 'Obese'
-    setResult({bmi: bmi.toFixed(1), category: cat})
+    let categoryKey = 'unknown'
+    if (bmi < 18.5) categoryKey = 'underweight'
+    else if (bmi < 25) categoryKey = 'normal'
+    else if (bmi < 30) categoryKey = 'overweight'
+    else categoryKey = 'obese'
+    setResult({bmi: bmi.toFixed(1), categoryKey})
   }
 
+  const categoryLabel = result ? getToolTranslation(locale, 'bmi-calculator', `form.${result.categoryKey}`) : ''
+
   return (
-    <ToolLayout title="BMI Calculator" description="Calculate Body Mass Index (BMI) quickly in the browser">
+    <ToolLayout title={title} description={description}>
       <form onSubmit={calculate} className="card">
-        <label className="block">Weight (kg)
+        <label className="block">{getToolTranslation(locale, 'bmi-calculator', 'form.weight')}
           <input className="mt-1 w-full" value={weight} onChange={e=>setWeight(e.target.value)} inputMode="decimal" />
         </label>
-        <label className="block mt-3">Height (cm)
+        <label className="block mt-3">{getToolTranslation(locale, 'bmi-calculator', 'form.height')}
           <input className="mt-1 w-full" value={height} onChange={e=>setHeight(e.target.value)} inputMode="decimal" />
         </label>
         <div className="mt-4">
-          <button className="px-4 py-2 bg-blue-600 text-white rounded">Calculate</button>
+          <button className="px-4 py-2 bg-blue-600 text-white rounded">{getToolTranslation(locale, 'bmi-calculator', 'form.calculate')}</button>
         </div>
       </form>
 
       <div className="mt-4 card">
-        <h4 className="font-semibold">Result</h4>
+        <h4 className="font-semibold">{getTranslation(locale, ['common', 'result'])}</h4>
         {result ? (
           <div className="mt-2">
             <div>BMI: <strong>{result.bmi}</strong></div>
-            <div>Category: <strong>{result.category}</strong></div>
+            <div>{getToolTranslation(locale, 'bmi-calculator', 'form.category')}: <strong>{categoryLabel}</strong></div>
           </div>
-        ) : <div className="muted mt-2">Enter values and press Calculate.</div>}
+        ) : <div className="muted mt-2">{getTranslation(locale, ['common', 'enterValues'])}</div>}
       </div>
 
       <section className="mt-6">
-        <h4 className="font-semibold">What this does</h4>
-        <p className="muted mt-1">Computes BMI = weight (kg) / (height (m))^2. For adults only; consult professionals for health advice.</p>
-        <h4 className="font-semibold mt-4">How to use</h4>
-        <p className="muted mt-1">Enter weight in kilograms and height in centimeters, then press Calculate.</p>
+        <h4 className="font-semibold">{getToolTranslation(locale, 'bmi-calculator', 'form.whatThisDoes')}</h4>
+        <p className="muted mt-1">{getToolTranslation(locale, 'bmi-calculator', 'form.whatThisDoes')}</p>
+        <h4 className="font-semibold mt-4">{getToolTranslation(locale, 'bmi-calculator', 'form.howToUse')}</h4>
+        <p className="muted mt-1">{getToolTranslation(locale, 'bmi-calculator', 'form.howToUse')}</p>
       </section>
 
-      <FAQ items={[{q:'Is BMI accurate?', a:'BMI is a rough indicator and does not account for muscle mass.'}]} />
+      <FAQ items={[{q:getTranslation(locale, ['common', 'result']), a:getTranslation(locale, ['common', 'enterValues'])}]} />
 
-      <RelatedTools tools={[{slug:'unit-converter', title:'Unit Converter'}]} />
+      <RelatedTools tools={[{slug:'unit-converter', title:getToolTranslation(locale, 'unit-converter', 'title')}]} />
     </ToolLayout>
   )
 }

@@ -1,15 +1,20 @@
 import Head from 'next/head'
+import {useRouter} from 'next/router'
+import {defaultLocale, getTranslation, getPageTitle} from '../lib/i18n'
 
 export default function Terms(){
+  const router = useRouter()
+  const locale = router.locale || defaultLocale
+
   return (
     <>
       <Head>
-        <title>Terms of Use — Utility Hub</title>
-        <meta name="description" content="Terms of use for Utility Hub." />
+        <title>{getPageTitle(locale, 'terms')}</title>
+        <meta name="description" content={getTranslation(locale, ['terms', 'description'])} />
       </Head>
       <section>
-        <h1 className="text-2xl font-bold">Terms of Use</h1>
-        <p className="muted mt-2">Use these tools at your own discretion. No warranties provided. Content for informational purposes only.</p>
+        <h1 className="text-2xl font-bold">{getTranslation(locale, ['terms', 'title'])}</h1>
+        <p className="muted mt-2">{getTranslation(locale, ['terms', 'description'])}</p>
       </section>
     </>
   )

@@ -1,9 +1,15 @@
 import ToolLayout from '../../components/ToolLayout'
 import FAQ from '../../components/FAQ'
 import RelatedTools from '../../components/RelatedTools'
+import {useRouter} from 'next/router'
 import {useState} from 'react'
+import {defaultLocale, getPageTitle, getToolTranslation, getTranslation} from '../../lib/i18n'
 
 export default function Loan(){
+  const router = useRouter()
+  const locale = router.locale || defaultLocale
+  const title = getToolTranslation(locale, 'loan-calculator', 'title')
+  const description = getToolTranslation(locale, 'loan-calculator', 'description')
   const [principal, setPrincipal] = useState('')
   const [annualRate, setAnnualRate] = useState('')
   const [years, setYears] = useState('')
@@ -20,37 +26,37 @@ export default function Loan(){
   }
 
   return (
-    <ToolLayout title="Loan Payment Calculator" description="Estimate monthly loan payments">
+    <ToolLayout title={title} description={description}>
       <form onSubmit={calculate} className="card">
-        <label>Principal
+        <label>{getToolTranslation(locale, 'loan-calculator', 'form.amount')}
           <input className="mt-1 w-full" value={principal} onChange={e=>setPrincipal(e.target.value)} inputMode="decimal" />
         </label>
-        <label className="block mt-3">Annual interest rate (%)
+        <label className="block mt-3">{getToolTranslation(locale, 'loan-calculator', 'form.rate')}
           <input className="mt-1 w-full" value={annualRate} onChange={e=>setAnnualRate(e.target.value)} inputMode="decimal" />
         </label>
-        <label className="block mt-3">Term (years)
+        <label className="block mt-3">{getToolTranslation(locale, 'loan-calculator', 'form.years')}
           <input className="mt-1 w-full" value={years} onChange={e=>setYears(e.target.value)} inputMode="numeric" />
         </label>
-        <div className="mt-4"><button className="px-4 py-2 bg-blue-600 text-white rounded">Calculate</button></div>
+        <div className="mt-4"><button className="px-4 py-2 bg-blue-600 text-white rounded">{getToolTranslation(locale, 'loan-calculator', 'form.calculate')}</button></div>
       </form>
 
       <div className="mt-4 card">
-        <h4 className="font-semibold">Result</h4>
+        <h4 className="font-semibold">{getTranslation(locale, ['common', 'result'])}</h4>
         {result ? (
           <div className="mt-2">
-            <div>Monthly payment: <strong>${result.monthly}</strong></div>
-            <div>Total paid: <strong>${result.total}</strong></div>
+            <div>{getToolTranslation(locale, 'loan-calculator', 'form.monthlyPayment')}: <strong>{result.monthly}</strong></div>
+            <div>Total paid: <strong>{result.total}</strong></div>
           </div>
-        ) : <div className="muted mt-2">Enter values and press Calculate.</div>}
+        ) : <div className="muted mt-2">{getTranslation(locale, ['common', 'enterValues'])}</div>}
       </div>
 
       <section className="mt-6">
-        <h4 className="font-semibold">How to use</h4>
-        <p className="muted mt-1">Provide loan amount, annual interest rate, and years to compute monthly payment using standard amortization formula.</p>
+        <h4 className="font-semibold">{getToolTranslation(locale, 'loan-calculator', 'form.howToUse')}</h4>
+        <p className="muted mt-1">{getToolTranslation(locale, 'loan-calculator', 'form.whatThisDoes')}</p>
       </section>
 
-      <FAQ items={[{q:'Does this include fees?', a:'No. This calculator ignores fees and taxes.'}]} />
-      <RelatedTools tools={[{slug:'loan-calculator', title:'Loan Payment Calculator'}, {slug:'unit-converter', title:'Unit Converter'}]} />
+      <FAQ items={[{q:getTranslation(locale, ['common', 'result']), a:getTranslation(locale, ['common', 'enterValues'])}]} />
+      <RelatedTools tools={[{slug:'loan-calculator', title:title}, {slug:'unit-converter', title:getToolTranslation(locale, 'unit-converter', 'title')}]} />
     </ToolLayout>
   )
 }

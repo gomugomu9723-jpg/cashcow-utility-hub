@@ -1,10 +1,16 @@
 import ToolLayout from '../../components/ToolLayout'
 import FAQ from '../../components/FAQ'
 import RelatedTools from '../../components/RelatedTools'
+import {useRouter} from 'next/router'
 import {useState} from 'react'
+import {defaultLocale, getToolTranslation, getTranslation} from '../../lib/i18n'
 // QR code library is imported dynamically to avoid build-time server issues
 
 export default function QRGenerator(){
+  const router = useRouter()
+  const locale = router.locale || defaultLocale
+  const title = getToolTranslation(locale, 'qr-code-generator', 'title')
+  const description = getToolTranslation(locale, 'qr-code-generator', 'description')
   const [text, setText] = useState('')
   const [size, setSize] = useState(200)
   const [src, setSrc] = useState('')
@@ -21,36 +27,36 @@ export default function QRGenerator(){
   }
 
   return (
-    <ToolLayout title="QR Code Generator" description="Create QR codes directly in your browser">
+    <ToolLayout title={title} description={description}>
       <form onSubmit={generate} className="card">
-        <label>Text or URL
+        <label>{getToolTranslation(locale, 'qr-code-generator', 'form.text')}
           <input className="mt-1 w-full" value={text} onChange={e=>setText(e.target.value)} />
         </label>
-        <label className="block mt-3">Size (px)
+        <label className="block mt-3">{getToolTranslation(locale, 'qr-code-generator', 'form.size')}
           <input className="mt-1 w-full" value={size} onChange={e=>setSize(e.target.value)} inputMode="numeric" />
         </label>
         <div className="mt-4">
-          <button className="px-4 py-2 bg-blue-600 text-white rounded">Generate</button>
+          <button className="px-4 py-2 bg-blue-600 text-white rounded">{getToolTranslation(locale, 'qr-code-generator', 'form.generate')}</button>
         </div>
       </form>
 
       <div className="mt-4 card">
-        <h4 className="font-semibold">Result</h4>
+        <h4 className="font-semibold">{getTranslation(locale, ['common', 'result'])}</h4>
         <div className="mt-2">
-          {src ? <img src={src} alt="QR code" /> : <div className="muted">Generated QR will appear here.</div>}
+          {src ? <img src={src} alt="QR code" /> : <div className="muted">{getTranslation(locale, ['common', 'enterValues'])}</div>}
         </div>
-        {src && <a className="inline-block mt-3 text-sm text-blue-600" href={src} download="qrcode.png">Download PNG</a>}
+        {src && <a className="inline-block mt-3 text-sm text-blue-600" href={src} download="qrcode.png">{getToolTranslation(locale, 'qr-code-generator', 'form.download')}</a>}
       </div>
 
       <section className="mt-6">
-        <h4 className="font-semibold">What this does</h4>
-        <p className="muted mt-1">Encodes text or URLs into a QR code image entirely in the browser — no data leaves the page.</p>
-        <h4 className="font-semibold mt-4">How to use</h4>
-        <p className="muted mt-1">Enter text or a link, optionally set pixel size, then click Generate. Use the download link to save a PNG.</p>
+        <h4 className="font-semibold">{getToolTranslation(locale, 'qr-code-generator', 'form.whatThisDoes')}</h4>
+        <p className="muted mt-1">{getToolTranslation(locale, 'qr-code-generator', 'form.whatThisDoes')}</p>
+        <h4 className="font-semibold mt-4">{getToolTranslation(locale, 'qr-code-generator', 'form.howToUse')}</h4>
+        <p className="muted mt-1">{getToolTranslation(locale, 'qr-code-generator', 'form.howToUse')}</p>
       </section>
 
-      <FAQ items={[{q:'Is my text sent to a server?', a:'No — the QR code is generated locally in your browser.'}]} />
-      <RelatedTools tools={[{slug:'qr-code-generator', title:'QR Code Generator'}, {slug:'unit-converter', title:'Unit Converter'}]} />
+      <FAQ items={[{q:getTranslation(locale, ['common', 'result']), a:getTranslation(locale, ['common', 'enterValues'])}]} />
+      <RelatedTools tools={[{slug:'qr-code-generator', title:title}, {slug:'unit-converter', title:getToolTranslation(locale, 'unit-converter', 'title')}]} />
     </ToolLayout>
   )
 }

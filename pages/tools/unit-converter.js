@@ -1,11 +1,12 @@
 import ToolLayout from '../../components/ToolLayout'
 import FAQ from '../../components/FAQ'
 import RelatedTools from '../../components/RelatedTools'
+import {useRouter} from 'next/router'
 import {useState, useMemo} from 'react'
+import {defaultLocale, getToolTranslation, getTranslation} from '../../lib/i18n'
 
 const converters = {
   length: {
-    label: 'Length',
     units: {
       m: 'Meters',
       km: 'Kilometers',
@@ -32,13 +33,11 @@ const converters = {
     }
   },
   weight: {
-    label: 'Weight',
     units: {kg:'Kilograms', lb:'Pounds'},
     toKg: (v,u)=> u==='kg'?v:v*0.45359237,
     fromKg: (k,u)=> u==='kg'?k:k/0.45359237
   },
   temp: {
-    label: 'Temperature',
     units: {c:'Celsius', f:'Fahrenheit'},
     convert: (v, from, to)=>{
       if (from===to) return v
@@ -50,12 +49,16 @@ const converters = {
 }
 
 export default function UnitConverter(){
+  const router = useRouter()
+  const locale = router.locale || defaultLocale
+  const title = getToolTranslation(locale, 'unit-converter', 'title')
+  const description = getToolTranslation(locale, 'unit-converter', 'description')
+
   const [category, setCategory] = useState('length')
   const [from, setFrom] = useState('m')
   const [to, setTo] = useState('km')
   const [value, setValue] = useState('')
 
-  // update defaults when category changes
   useMemo(()=>{
     const keys = Object.keys(converters[category].units)
     setFrom(keys[0])
@@ -82,19 +85,19 @@ export default function UnitConverter(){
   const result = compute()
 
   return (
-    <ToolLayout title="Unit Converter" description="Convert common units (length, weight, temperature) in the browser">
+    <ToolLayout title={title} description={description}>
       <div className="card">
-        <label className="block">Category
+        <label className="block">{getToolTranslation(locale, 'unit-converter', 'form.category')}
           <select className="mt-1 w-full" value={category} onChange={e=>setCategory(e.target.value)}>
-            <option value="length">Length</option>
-            <option value="weight">Weight</option>
-            <option value="temp">Temperature</option>
+            <option value="length">{getTranslation(locale, ['common', 'relatedTools'], 'Length')}</option>
+            <option value="weight">{getTranslation(locale, ['common', 'relatedTools'], 'Weight')}</option>
+            <option value="temp">{getTranslation(locale, ['common', 'relatedTools'], 'Temperature')}</option>
           </select>
         </label>
 
         <div className="grid grid-cols-2 gap-3 mt-3">
           <div>
-            <label>From
+            <label>{getToolTranslation(locale, 'unit-converter', 'form.from')}
               <select className="mt-1 w-full" value={from} onChange={e=>setFrom(e.target.value)}>
                 {Object.entries(converters[category].units).map(([k,v])=> (
                   <option key={k} value={k}>{v}</option>
@@ -103,7 +106,7 @@ export default function UnitConverter(){
             </label>
           </div>
           <div>
-            <label>To
+            <label>{getToolTranslation(locale, 'unit-converter', 'form.to')}
               <select className="mt-1 w-full" value={to} onChange={e=>setTo(e.target.value)}>
                 {Object.entries(converters[category].units).map(([k,v])=> (
                   <option key={k} value={k}>{v}</option>
@@ -113,14 +116,14 @@ export default function UnitConverter(){
           </div>
         </div>
 
-        <label className="block mt-3">Value
+        <label className="block mt-3">{getToolTranslation(locale, 'unit-converter', 'form.value')}
           <input className="mt-1 w-full" value={value} onChange={e=>setValue(e.target.value)} inputMode="decimal" />
         </label>
 
         <div className="mt-4">
-          <div className="font-medium">Result</div>
+          <div className="font-medium">{getTranslation(locale, ['common', 'result'])}</div>
           <div className="mt-2">
-            {value === '' || result === '' ? <div className="muted">Enter a value to see the conversion.</div> : (
+            {value === '' || result === '' ? <div className="muted">{getTranslation(locale, ['common', 'enterValues'])}</div> : (
               <div><strong>{Number(result).toLocaleString(undefined,{maximumFractionDigits:6})}</strong> {converters[category].units[to]}</div>
             )}
           </div>
@@ -128,14 +131,14 @@ export default function UnitConverter(){
       </div>
 
       <section className="mt-6">
-        <h4 className="font-semibold">What this does</h4>
-        <p className="muted mt-1">Simple client-side unit conversions for common measurements. Results are approximate for some unit pairs.</p>
-        <h4 className="font-semibold mt-4">How to use</h4>
-        <p className="muted mt-1">Choose a category, select source and target units, enter a numeric value and read the converted result.</p>
+        <h4 className="font-semibold">{getToolTranslation(locale, 'unit-converter', 'form.whatThisDoes')}</h4>
+        <p className="muted mt-1">{getToolTranslation(locale, 'unit-converter', 'form.whatThisDoes')}</p>
+        <h4 className="font-semibold mt-4">{getToolTranslation(locale, 'unit-converter', 'form.howToUse')}</h4>
+        <p className="muted mt-1">{getToolTranslation(locale, 'unit-converter', 'form.howToUse')}</p>
       </section>
 
-      <FAQ items={[{q:'Are these conversions exact?', a:'Most are exact for the listed units; some conversions (e.g., approximated definitions) may be rounded.'}]} />
-      <RelatedTools tools={[{slug:'bmi-calculator', title:'BMI Calculator'}, {slug:'unit-converter', title:'Unit Converter'}]} />
+      <FAQ items={[{q:getTranslation(locale, ['common', 'result']), a:getTranslation(locale, ['common', 'enterValues'])}]} />
+      <RelatedTools tools={[{slug:'bmi-calculator', title:getToolTranslation(locale, 'bmi-calculator', 'title')}, {slug:'unit-converter', title:title}]} />
     </ToolLayout>
   )
 }

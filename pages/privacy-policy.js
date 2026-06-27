@@ -1,16 +1,21 @@
 import Head from 'next/head'
+import {useRouter} from 'next/router'
+import {defaultLocale, getTranslation, getPageTitle} from '../lib/i18n'
 
 export default function Privacy(){
+  const router = useRouter()
+  const locale = router.locale || defaultLocale
+
   return (
     <>
       <Head>
-        <title>Privacy Policy — Utility Hub</title>
-        <meta name="description" content="Privacy policy for Utility Hub — static browser tools, no tracking by default." />
+        <title>{getPageTitle(locale, 'privacy')}</title>
+        <meta name="description" content={getTranslation(locale, ['privacy', 'description'])} />
       </Head>
       <section>
-        <h1 className="text-2xl font-bold">Privacy Policy</h1>
-        <p className="muted mt-2">This site is static and uses client-side code only. No user data is collected or stored by default.</p>
-        <p className="mt-2">If third-party services (analytics, ads) are added later, they will be disclosed here.</p>
+        <h1 className="text-2xl font-bold">{getTranslation(locale, ['privacy', 'title'])}</h1>
+        <p className="muted mt-2">{getTranslation(locale, ['privacy', 'description'])}</p>
+        <p className="mt-2">{getTranslation(locale, ['privacy', 'additional'])}</p>
       </section>
     </>
   )

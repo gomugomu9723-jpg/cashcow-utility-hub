@@ -1,16 +1,23 @@
 import Head from 'next/head'
+import {useRouter} from 'next/router'
+import {defaultLocale, getTranslation, getPageTitle} from '../lib/i18n'
 
 export default function Contact(){
+  const router = useRouter()
+  const locale = router.locale || defaultLocale
+
   return (
     <>
       <Head>
-        <title>Contact — Utility Hub</title>
-        <meta name="description" content="Contact Utility Hub for support or questions." />
+        <title>{getPageTitle(locale, 'contact')}</title>
+        <meta name="description" content={getTranslation(locale, ['contact', 'description'])} />
       </Head>
       <section>
-        <h1 className="text-2xl font-bold">Contact</h1>
-        <p className="muted mt-2">This is a static site. For inquiries, add a mailto link or external form integration.</p>
-        <p className="mt-4">Email: <a href="mailto:contact@example.com" className="underline">contact@example.com</a></p>
+        <h1 className="text-2xl font-bold">{getTranslation(locale, ['contact', 'title'])}</h1>
+        <p className="muted mt-2">{getTranslation(locale, ['contact', 'description'])}</p>
+        <p className="mt-4">
+          {getTranslation(locale, ['common', 'email'])}: <a href={`mailto:${getTranslation(locale, ['contact', 'email'])}`} className="underline">{getTranslation(locale, ['contact', 'email'])}</a>
+        </p>
       </section>
     </>
   )
