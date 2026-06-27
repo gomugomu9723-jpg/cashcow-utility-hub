@@ -1,0 +1,8 @@
+{
+    "chat.tools.terminal.autoApprove": {
+        "/^cmd /c \"cd /d E:\\\\CashCow Homepage && if exist \\.next\\\\server\\\\chunks\\\\vendor-chunks \\(echo EXISTS\\) else \\(echo MISSING\\) && dir \\.next\\\\server\\\\chunks\\\\vendor-chunks\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
+    }
+}
