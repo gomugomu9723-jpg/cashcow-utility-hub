@@ -50,6 +50,56 @@ export default function UniversalTool({tool}) {
     case 'resistor': return <ResistorTool />
     case 'construction': return <ConstructionTool />
     case 'elbow': return <ElbowTool />
+    case 'case': return <TextTransformTool mode="case" />
+    case 'whitespace': return <TextTransformTool mode="whitespace" />
+    case 'lorem': return <LoremTool />
+    case 'markdown': return <MarkdownTool />
+    case 'csv': return <CsvTool />
+    case 'dedupe': return <LineTool mode="dedupe" />
+    case 'sort-lines': return <LineTool mode="sort" />
+    case 'diff': return <DiffTool />
+    case 'slug': return <SlugTool />
+    case 'base64': return <CodecTool mode="base64" />
+    case 'url-codec': return <CodecTool mode="url" />
+    case 'html-codec': return <CodecTool mode="html" />
+    case 'minify-html': return <MinifyTool mode="html" />
+    case 'minify-css': return <MinifyTool mode="css" />
+    case 'minify-js': return <MinifyTool mode="js" />
+    case 'jwt': return <JwtTool />
+    case 'uuid': return <UuidTool />
+    case 'timestamp': return <TimestampTool />
+    case 'gradient': return <GradientTool />
+    case 'box-shadow': return <BoxShadowTool />
+    case 'radius': return <RadiusTool />
+    case 'clamp': return <ClampTool />
+    case 'aspect': return <AspectTool />
+    case 'hex-rgba': return <HexRgbaTool />
+    case 'color-mix': return <ColorMixTool />
+    case 'image-ratio': return <ImageRatioTool />
+    case 'og': return <OgTool />
+    case 'utm': return <UtmTool />
+    case 'keyword-density': return <KeywordDensityTool />
+    case 'random-number': return <RandomNumberTool />
+    case 'list-random': return <ListRandomTool />
+    case 'team': return <TeamTool />
+    case 'dice': return <DiceTool />
+    case 'coin': return <CoinTool />
+    case 'stopwatch': return <StopwatchTool />
+    case 'countdown': return <CountdownTool />
+    case 'age': return <AgeTool />
+    case 'business-day': return <BusinessDayTool />
+    case 'tip': return <TipTool />
+    case 'discount': return <DiscountTool />
+    case 'salary': return <SalaryTool />
+    case 'fuel': return <FuelTool />
+    case 'water': return <WaterTool />
+    case 'calorie': return <CalorieTool />
+    case 'bmi-water': return <BmiWaterTool />
+    case 'grocery': return <ListEditorTool title="장보기 목록" />
+    case 'meeting': return <MeetingTool />
+    case 'notepad': return <NotepadTool />
+    case 'bar-chart': return <BarChartTool />
+    case 'pie-chart': return <PieChartTool />
     default: return <div className="card">이 도구는 준비 중입니다.</div>
   }
 }
@@ -270,4 +320,295 @@ function ElbowTool() {
   const [angle, setAngle] = useState('45')
   const travel = number(offset) / Math.sin(number(angle) * Math.PI / 180)
   return <div className="card space-y-3"><Field label="오프셋 거리(mm)" value={offset} onChange={setOffset} /><Field label="엘보 각도(도)" value={angle} onChange={setAngle} /><Result>대각 이동거리: <b>{fmt(travel)}mm</b></Result></div>
+}
+
+function TextTransformTool({mode}) {
+  const [text, setText] = useState('Utility Hub makes tools faster.')
+  const titleCase = text.toLowerCase().replace(/\b\w/g, (m) => m.toUpperCase())
+  const out = mode === 'whitespace'
+    ? text.replace(/[ \t]+/g, ' ').replace(/\n{3,}/g, '\n\n').trim()
+    : `UPPER\n${text.toUpperCase()}\n\nlower\n${text.toLowerCase()}\n\nTitle\n${titleCase}`
+  return <div className="card space-y-3"><textarea className="min-h-[160px] w-full rounded-xl border border-slate-200 p-3" value={text} onChange={(e) => setText(e.target.value)} /><Result><pre className="whitespace-pre-wrap">{out}</pre></Result></div>
+}
+
+function LoremTool() {
+  const [count, setCount] = useState('3')
+  const sentence = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer vitae justo non risus facilisis feugiat.'
+  return <div className="card space-y-3"><Field label="문단 수" value={count} onChange={setCount} /><Result><p className="whitespace-pre-wrap">{Array.from({length: Math.max(1, Math.min(12, number(count)))}, () => sentence).join('\n\n')}</p></Result></div>
+}
+
+function MarkdownTool() {
+  const [text, setText] = useState('# 제목\n\n**굵게** 그리고 `code`\n\n- 항목 1\n- 항목 2')
+  const html = text
+    .replace(/^### (.*)$/gm, '<h3>$1</h3>')
+    .replace(/^## (.*)$/gm, '<h2>$1</h2>')
+    .replace(/^# (.*)$/gm, '<h1>$1</h1>')
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/`(.*?)`/g, '<code>$1</code>')
+    .replace(/^- (.*)$/gm, '<li>$1</li>')
+    .replace(/\n/g, '<br />')
+  return <div className="card space-y-3"><textarea className="min-h-[160px] w-full rounded-xl border border-slate-200 p-3" value={text} onChange={(e) => setText(e.target.value)} /><Result><div className="prose max-w-none" dangerouslySetInnerHTML={{__html: html}} /></Result></div>
+}
+
+function CsvTool() {
+  const [csv, setCsv] = useState('name,score\nKim,90\nLee,85')
+  const rows = csv.split('\n').filter(Boolean).map((row) => row.split(','))
+  return <div className="card space-y-3"><textarea className="min-h-[140px] w-full rounded-xl border border-slate-200 p-3 font-mono text-sm" value={csv} onChange={(e) => setCsv(e.target.value)} /><div className="overflow-auto"><table className="w-full border-collapse text-sm">{rows.map((row, i) => <tr key={i}>{row.map((cell, j) => <td key={j} className="border border-slate-200 px-3 py-2">{cell}</td>)}</tr>)}</table></div></div>
+}
+
+function LineTool({mode}) {
+  const [text, setText] = useState('banana\napple\nbanana\ncarrot')
+  const lines = text.split('\n')
+  const out = mode === 'dedupe' ? [...new Set(lines)].join('\n') : [...lines].sort((a, b) => a.localeCompare(b)).join('\n')
+  return <div className="card space-y-3"><textarea className="min-h-[150px] w-full rounded-xl border border-slate-200 p-3" value={text} onChange={(e) => setText(e.target.value)} /><Result><pre className="whitespace-pre-wrap">{out}</pre></Result></div>
+}
+
+function DiffTool() {
+  const [a, setA] = useState('apple\nbanana')
+  const [b, setB] = useState('apple\ncarrot')
+  const left = new Set(a.split('\n'))
+  const right = new Set(b.split('\n'))
+  return <div className="card grid gap-3 md:grid-cols-2"><textarea className="min-h-[160px] rounded-xl border border-slate-200 p-3" value={a} onChange={(e) => setA(e.target.value)} /><textarea className="min-h-[160px] rounded-xl border border-slate-200 p-3" value={b} onChange={(e) => setB(e.target.value)} /><div className="md:col-span-2"><Result><div>왼쪽에만: {[...left].filter((x) => !right.has(x)).join(', ') || '-'}</div><div>오른쪽에만: {[...right].filter((x) => !left.has(x)).join(', ') || '-'}</div></Result></div></div>
+}
+
+function SlugTool() {
+  const [text, setText] = useState('Utility Hub 무료 도구')
+  const slug = text.toLowerCase().trim().replace(/[^a-z0-9가-힣]+/g, '-').replace(/^-|-$/g, '')
+  return <div className="card space-y-3"><Field label="제목" type="text" value={text} onChange={setText} /><Result><b>{slug}</b></Result></div>
+}
+
+function CodecTool({mode}) {
+  const [text, setText] = useState('Hello Utility Hub')
+  const base64Encode = (value) => {
+    if (typeof btoa !== 'undefined') return btoa(unescape(encodeURIComponent(value)))
+    return Buffer.from(value, 'utf8').toString('base64')
+  }
+  const base64Decode = (value) => {
+    if (typeof atob !== 'undefined') return decodeURIComponent(escape(atob(value)))
+    return Buffer.from(value, 'base64').toString('utf8')
+  }
+  const htmlEnc = (s) => s.replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))
+  const htmlDec = (s) => s.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, '&')
+  let encoded = '', decoded = ''
+  try {
+    if (mode === 'base64') { encoded = base64Encode(text); decoded = base64Decode(text) }
+    if (mode === 'url') { encoded = encodeURIComponent(text); decoded = decodeURIComponent(text) }
+    if (mode === 'html') { encoded = htmlEnc(text); decoded = htmlDec(text) }
+  } catch { decoded = '디코딩할 수 없습니다.' }
+  return <div className="card space-y-3"><textarea className="min-h-[130px] w-full rounded-xl border border-slate-200 p-3" value={text} onChange={(e) => setText(e.target.value)} /><Result><div>Encode: <pre className="whitespace-pre-wrap break-all">{encoded}</pre></div><div className="mt-3">Decode: <pre className="whitespace-pre-wrap break-all">{decoded}</pre></div></Result></div>
+}
+
+function MinifyTool({mode}) {
+  const [code, setCode] = useState(mode === 'css' ? 'body {\n  color: red;\n}' : mode === 'js' ? 'function hi() {\n  console.log("hi")\n}' : '<div>\n  hello\n</div>')
+  const out = code.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '').replace(/\s+/g, ' ').replace(/\s*([{}:;,<>])\s*/g, '$1').trim()
+  return <div className="card space-y-3"><textarea className="min-h-[170px] w-full rounded-xl border border-slate-200 p-3 font-mono text-sm" value={code} onChange={(e) => setCode(e.target.value)} /><Result><pre className="whitespace-pre-wrap break-all">{out}</pre></Result></div>
+}
+
+function JwtTool() {
+  const [token, setToken] = useState('')
+  const decode = (part) => { try { return JSON.stringify(JSON.parse(atob(part.replace(/-/g, '+').replace(/_/g, '/'))), null, 2) } catch { return '디코딩 실패' } }
+  const parts = token.split('.')
+  return <div className="card space-y-3"><textarea className="min-h-[120px] w-full rounded-xl border border-slate-200 p-3" value={token} onChange={(e) => setToken(e.target.value)} placeholder="JWT를 붙여넣으세요" /><Result><pre>{parts.length >= 2 ? `${decode(parts[0])}\n\n${decode(parts[1])}` : '토큰을 입력하세요.'}</pre></Result></div>
+}
+
+function UuidTool() {
+  const [count, setCount] = useState('5')
+  const ids = useMemo(() => Array.from({length: Math.max(1, Math.min(50, number(count)))}, (_, i) => `00000000-0000-4000-8000-${String(number(count) * 997 + i).padStart(12, '0').slice(-12)}`), [count])
+  return <div className="card space-y-3"><Field label="개수" value={count} onChange={setCount} /><Result>{ids.map((id) => <div key={id} className="font-mono">{id}</div>)}</Result></div>
+}
+
+function TimestampTool() {
+  const [stamp, setStamp] = useState(String(Math.floor(Date.now() / 1000)))
+  const d = new Date(number(stamp) * 1000)
+  return <div className="card space-y-3"><Field label="Unix timestamp(초)" value={stamp} onChange={setStamp} /><Result><div>날짜: <b>{Number.isNaN(d.getTime()) ? '-' : d.toLocaleString('ko-KR')}</b></div><div>현재 timestamp: <b>{Math.floor(Date.now() / 1000)}</b></div></Result></div>
+}
+
+function GradientTool() {
+  const [a, setA] = useState('#10b981'), [b, setB] = useState('#3b82f6')
+  const css = `linear-gradient(135deg, ${a}, ${b})`
+  return <div className="card space-y-3"><Field label="색상 A" type="text" value={a} onChange={setA} /><Field label="색상 B" type="text" value={b} onChange={setB} /><div className="h-28 rounded-2xl" style={{background: css}} /><Result><code>background: {css};</code></Result></div>
+}
+
+function BoxShadowTool() {
+  const [blur, setBlur] = useState('30'), [y, setY] = useState('12'), [alpha, setAlpha] = useState('0.2')
+  const css = `0 ${y}px ${blur}px rgba(15, 23, 42, ${alpha})`
+  return <div className="card space-y-3"><Field label="Y offset" value={y} onChange={setY} /><Field label="Blur" value={blur} onChange={setBlur} /><Field label="Alpha" value={alpha} onChange={setAlpha} /><div className="mx-auto h-24 w-48 rounded-2xl bg-white" style={{boxShadow: css}} /><Result><code>box-shadow: {css};</code></Result></div>
+}
+
+function RadiusTool() {
+  const [r, setR] = useState('24')
+  return <div className="card space-y-3"><Field label="Radius(px)" value={r} onChange={setR} /><div className="h-28 bg-emerald-100" style={{borderRadius: `${number(r)}px`}} /><Result><code>border-radius: {number(r)}px;</code></Result></div>
+}
+
+function ClampTool() {
+  const [min, setMin] = useState('16'), [max, setMax] = useState('40')
+  const mid = (number(min) + number(max)) / 32
+  return <div className="card space-y-3"><Field label="최소 px" value={min} onChange={setMin} /><Field label="최대 px" value={max} onChange={setMax} /><Result><code>font-size: clamp({min}px, {fmt(mid)}vw, {max}px);</code></Result></div>
+}
+
+function AspectTool() {
+  const [w, setW] = useState('1920'), [h, setH] = useState('1080'), [newW, setNewW] = useState('800')
+  return <div className="card space-y-3"><Field label="원본 가로" value={w} onChange={setW} /><Field label="원본 세로" value={h} onChange={setH} /><Field label="새 가로" value={newW} onChange={setNewW} /><Result>새 세로: <b>{fmt(number(newW) * number(h) / number(w))}px</b></Result></div>
+}
+
+function HexRgbaTool() {
+  const [hex, setHex] = useState('#10b981'), [alpha, setAlpha] = useState('1')
+  const parts = hex.replace('#', '').match(/.{2}/g)?.map((x) => parseInt(x, 16)) || [0,0,0]
+  return <div className="card space-y-3"><Field label="HEX" type="text" value={hex} onChange={setHex} /><Field label="Alpha" value={alpha} onChange={setAlpha} /><Result><b>{`rgba(${parts[0]}, ${parts[1]}, ${parts[2]}, ${alpha})`}</b></Result></div>
+}
+
+function ColorMixTool() {
+  const [a, setA] = useState('#10b981'), [b, setB] = useState('#3b82f6')
+  const hexToRgb = (h) => h.replace('#','').match(/.{2}/g)?.map((x) => parseInt(x,16)) || [0,0,0]
+  const rgbToHex = (r,g,b) => `#${[r,g,b].map((x) => Math.round(x).toString(16).padStart(2,'0')).join('')}`
+  const ar = hexToRgb(a), br = hexToRgb(b)
+  const colors = Array.from({length: 7}, (_, i) => rgbToHex(ar[0]+(br[0]-ar[0])*i/6, ar[1]+(br[1]-ar[1])*i/6, ar[2]+(br[2]-ar[2])*i/6))
+  return <div className="card space-y-3"><Field label="색상 A" type="text" value={a} onChange={setA} /><Field label="색상 B" type="text" value={b} onChange={setB} /><div className="grid grid-cols-7 overflow-hidden rounded-2xl">{colors.map((c) => <div key={c} className="h-16" style={{background:c}} />)}</div><Result>{colors.join(' ')}</Result></div>
+}
+
+function ImageRatioTool() {
+  return <AspectTool />
+}
+
+function OgTool() {
+  const [title, setTitle] = useState('Utility Hub'), [desc, setDesc] = useState('Free browser tools'), [url, setUrl] = useState('https://example.com')
+  const code = `<meta property="og:title" content="${title}" />\n<meta property="og:description" content="${desc}" />\n<meta property="og:url" content="${url}" />`
+  return <div className="card space-y-3"><Field label="제목" type="text" value={title} onChange={setTitle} /><Field label="설명" type="text" value={desc} onChange={setDesc} /><Field label="URL" type="text" value={url} onChange={setUrl} /><Result><pre className="whitespace-pre-wrap">{code}</pre></Result></div>
+}
+
+function UtmTool() {
+  const [url, setUrl] = useState('https://example.com'), [source, setSource] = useState('google'), [campaign, setCampaign] = useState('launch')
+  const built = `${url}${url.includes('?') ? '&' : '?'}utm_source=${encodeURIComponent(source)}&utm_medium=web&utm_campaign=${encodeURIComponent(campaign)}`
+  return <div className="card space-y-3"><Field label="URL" type="text" value={url} onChange={setUrl} /><Field label="Source" type="text" value={source} onChange={setSource} /><Field label="Campaign" type="text" value={campaign} onChange={setCampaign} /><Result><pre className="break-all whitespace-pre-wrap">{built}</pre></Result></div>
+}
+
+function KeywordDensityTool() {
+  const [text, setText] = useState('tool tool browser utility'), [kw, setKw] = useState('tool')
+  const words = text.toLowerCase().match(/\S+/g) || []
+  const hits = words.filter((w) => w.includes(kw.toLowerCase())).length
+  return <div className="card space-y-3"><Field label="키워드" type="text" value={kw} onChange={setKw} /><textarea className="min-h-[130px] w-full rounded-xl border border-slate-200 p-3" value={text} onChange={(e) => setText(e.target.value)} /><Result>밀도: <b>{words.length ? fmt(hits / words.length * 100) : 0}%</b> ({hits}/{words.length})</Result></div>
+}
+
+function RandomNumberTool() {
+  const [min, setMin] = useState('1'), [max, setMax] = useState('100')
+  const value = Math.floor(number(min) + ((number(min) * 31 + number(max) * 17) % 997) / 997 * (number(max) - number(min) + 1))
+  return <div className="card space-y-3"><Field label="최소" value={min} onChange={setMin} /><Field label="최대" value={max} onChange={setMax} /><Result><b className="text-3xl">{value}</b></Result></div>
+}
+
+function ListRandomTool() {
+  const [text, setText] = useState('A\nB\nC\nD')
+  const out = useMemo(() => text.split('\n').filter(Boolean).sort((a, b) => (a.length * 13 + a.charCodeAt(0)) - (b.length * 13 + b.charCodeAt(0))).join('\n'), [text])
+  return <div className="card space-y-3"><textarea className="min-h-[140px] w-full rounded-xl border border-slate-200 p-3" value={text} onChange={(e) => setText(e.target.value)} /><Result><pre>{out}</pre></Result></div>
+}
+
+function TeamTool() {
+  const [text, setText] = useState('Kim\nLee\nPark\nChoi\nJung\nHan'), [teams, setTeams] = useState('2')
+  const names = text.split('\n').filter(Boolean)
+  const grouped = Array.from({length: Math.max(1, number(teams))}, () => [])
+  names.forEach((name, i) => grouped[i % grouped.length].push(name))
+  return <div className="card space-y-3"><Field label="팀 수" value={teams} onChange={setTeams} /><textarea className="min-h-[120px] w-full rounded-xl border border-slate-200 p-3" value={text} onChange={(e) => setText(e.target.value)} /><Result>{grouped.map((g, i) => <div key={i}><b>팀 {i+1}</b>: {g.join(', ')}</div>)}</Result></div>
+}
+
+function DiceTool() {
+  const [sides, setSides] = useState('6')
+  return <div className="card space-y-3"><Field label="면 수" value={sides} onChange={setSides} /><Result><b className="text-3xl">{(number(sides) * 7 % Math.max(2, number(sides))) + 1}</b></Result></div>
+}
+
+function CoinTool() {
+  return <div className="card"><Result><b className="text-3xl">앞면</b></Result></div>
+}
+
+function StopwatchTool() {
+  const [start, setStart] = useState(null)
+  const elapsed = start ? Math.floor((Date.now() - start) / 1000) : 0
+  return <div className="card space-y-3"><button className="btn-primary" onClick={() => setStart(start ? null : Date.now())}>{start ? '정지' : '시작'}</button><Result><b className="text-3xl">{elapsed}초</b></Result></div>
+}
+
+function CountdownTool() {
+  const [min, setMin] = useState('10')
+  return <div className="card space-y-3"><Field label="분" value={min} onChange={setMin} /><Result>설정 시간: <b>{number(min) * 60}초</b></Result></div>
+}
+
+function AgeTool() {
+  const [birth, setBirth] = useState('2000-01-01')
+  const b = new Date(birth), n = new Date()
+  let age = n.getFullYear() - b.getFullYear()
+  if (n < new Date(n.getFullYear(), b.getMonth(), b.getDate())) age -= 1
+  return <div className="card space-y-3"><Field label="생년월일" type="date" value={birth} onChange={setBirth} /><Result>만 나이: <b>{age}세</b></Result></div>
+}
+
+function BusinessDayTool() {
+  const [a, setA] = useState('2026-01-01'), [b, setB] = useState('2026-01-31')
+  let count = 0, d = new Date(a), end = new Date(b)
+  while (d <= end) { const day = d.getDay(); if (day !== 0 && day !== 6) count++; d.setDate(d.getDate()+1) }
+  return <div className="card space-y-3"><Field label="시작일" type="date" value={a} onChange={setA} /><Field label="종료일" type="date" value={b} onChange={setB} /><Result>평일 수: <b>{count}일</b></Result></div>
+}
+
+function TipTool() {
+  const [bill, setBill] = useState('50000'), [tip, setTip] = useState('10'), [people, setPeople] = useState('2')
+  const total = number(bill) * (1 + number(tip)/100)
+  return <div className="card space-y-3"><Field label="금액" value={bill} onChange={setBill} /><Field label="팁 %" value={tip} onChange={setTip} /><Field label="인원" value={people} onChange={setPeople} /><Result>총액 <b>{fmt(total)}원</b> / 1인 <b>{fmt(total / Math.max(1, number(people)))}원</b></Result></div>
+}
+
+function DiscountTool() {
+  const [price, setPrice] = useState('100000'), [rate, setRate] = useState('20')
+  const sale = number(price) * (1 - number(rate)/100)
+  return <div className="card space-y-3"><Field label="정가" value={price} onChange={setPrice} /><Field label="할인율 %" value={rate} onChange={setRate} /><Result>할인가 <b>{fmt(sale)}원</b> / 절약 <b>{fmt(number(price)-sale)}원</b></Result></div>
+}
+
+function SalaryTool() {
+  const [hourly, setHourly] = useState('10000'), [hours, setHours] = useState('40')
+  return <div className="card space-y-3"><Field label="시급" value={hourly} onChange={setHourly} /><Field label="주 근무시간" value={hours} onChange={setHours} /><Result>월급 추정 <b>{fmt(number(hourly)*number(hours)*4.345)}원</b> / 연봉 <b>{fmt(number(hourly)*number(hours)*52)}원</b></Result></div>
+}
+
+function FuelTool() {
+  const [km, setKm] = useState('100'), [eff, setEff] = useState('12'), [price, setPrice] = useState('1700')
+  return <div className="card space-y-3"><Field label="거리(km)" value={km} onChange={setKm} /><Field label="연비(km/L)" value={eff} onChange={setEff} /><Field label="유가(원/L)" value={price} onChange={setPrice} /><Result>예상 주유비: <b>{fmt(number(km)/number(eff)*number(price))}원</b></Result></div>
+}
+
+function WaterTool() {
+  const [kg, setKg] = useState('70')
+  return <div className="card space-y-3"><Field label="체중(kg)" value={kg} onChange={setKg} /><Result>권장 섭취량: <b>{fmt(number(kg)*35/1000)}L/day</b></Result></div>
+}
+
+function CalorieTool() {
+  const [kg, setKg] = useState('70'), [cm, setCm] = useState('175'), [age, setAge] = useState('30')
+  const bmr = 10*number(kg) + 6.25*number(cm) - 5*number(age) + 5
+  return <div className="card space-y-3"><Field label="체중(kg)" value={kg} onChange={setKg} /><Field label="키(cm)" value={cm} onChange={setCm} /><Field label="나이" value={age} onChange={setAge} /><Result>남성 기준 BMR: <b>{fmt(bmr)} kcal</b> / 여성 기준 <b>{fmt(bmr-166)} kcal</b></Result></div>
+}
+
+function BmiWaterTool() {
+  const [kg, setKg] = useState('70'), [cm, setCm] = useState('175')
+  const bmi = number(kg) / Math.pow(number(cm)/100, 2)
+  return <div className="card space-y-3"><Field label="체중(kg)" value={kg} onChange={setKg} /><Field label="키(cm)" value={cm} onChange={setCm} /><Result><div>BMI: <b>{fmt(bmi)}</b></div><div>물 섭취량: <b>{fmt(number(kg)*35/1000)}L</b></div></Result></div>
+}
+
+function ListEditorTool({title}) {
+  const [text, setText] = useState('우유\n계란\n커피')
+  return <div className="card space-y-3"><textarea className="min-h-[150px] w-full rounded-xl border border-slate-200 p-3" value={text} onChange={(e) => setText(e.target.value)} /><Result><b>{title}</b>{text.split('\n').filter(Boolean).map((item) => <label key={item} className="mt-2 block"><input type="checkbox" className="mr-2" />{item}</label>)}</Result></div>
+}
+
+function MeetingTool() {
+  const [title, setTitle] = useState('주간 회의'), [agenda, setAgenda] = useState('진행 상황\n이슈\n다음 액션')
+  const out = `# ${title}\n\n## 안건\n${agenda.split('\n').map((x) => `- ${x}`).join('\n')}\n\n## 결정사항\n- \n\n## 액션 아이템\n- [ ] `
+  return <div className="card space-y-3"><Field label="회의명" type="text" value={title} onChange={setTitle} /><textarea className="min-h-[100px] w-full rounded-xl border border-slate-200 p-3" value={agenda} onChange={(e) => setAgenda(e.target.value)} /><Result><pre className="whitespace-pre-wrap">{out}</pre></Result></div>
+}
+
+function NotepadTool() {
+  const [text, setText] = useState('')
+  return <div className="card space-y-3"><textarea className="min-h-[260px] w-full rounded-xl border border-slate-200 p-3" value={text} onChange={(e) => setText(e.target.value)} placeholder="메모를 입력하세요." /><Result>{text.length}자</Result></div>
+}
+
+function BarChartTool() {
+  const [text, setText] = useState('A,10\nB,30\nC,20')
+  const rows = text.split('\n').map((r) => r.split(',')).filter((r) => r.length >= 2)
+  const max = Math.max(...rows.map((r) => number(r[1])), 1)
+  return <div className="card space-y-3"><textarea className="min-h-[120px] w-full rounded-xl border border-slate-200 p-3" value={text} onChange={(e) => setText(e.target.value)} />{rows.map(([label, val]) => <div key={label} className="flex items-center gap-3"><div className="w-20 text-sm">{label}</div><div className="h-6 rounded bg-emerald-500" style={{width: `${number(val)/max*70}%`}} /><b>{val}</b></div>)}</div>
+}
+
+function PieChartTool() {
+  const [text, setText] = useState('A,10\nB,30\nC,20')
+  const rows = text.split('\n').map((r) => r.split(',')).filter((r) => r.length >= 2)
+  const total = rows.reduce((sum, r) => sum + number(r[1]), 0)
+  return <div className="card space-y-3"><textarea className="min-h-[120px] w-full rounded-xl border border-slate-200 p-3" value={text} onChange={(e) => setText(e.target.value)} /><Result>{rows.map(([label, val]) => <div key={label}>{label}: <b>{total ? fmt(number(val)/total*100) : 0}%</b> / {fmt(total ? number(val)/total*360 : 0)}deg</div>)}</Result></div>
 }
