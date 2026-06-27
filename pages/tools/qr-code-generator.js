@@ -3,12 +3,12 @@ import FAQ from '../../components/FAQ'
 import RelatedTools from '../../components/RelatedTools'
 import {useRouter} from 'next/router'
 import {useState} from 'react'
-import {defaultLocale, getToolTranslation, getTranslation} from '../../lib/i18n'
+import {getQueryLocale, getToolTranslation, getTranslation} from '../../lib/i18n'
 // QR code library is imported dynamically to avoid build-time server issues
 
 export default function QRGenerator(){
   const router = useRouter()
-  const locale = router.locale || defaultLocale
+  const locale = getQueryLocale(router)
   const title = getToolTranslation(locale, 'qr-code-generator', 'title')
   const description = getToolTranslation(locale, 'qr-code-generator', 'description')
   const [text, setText] = useState('')

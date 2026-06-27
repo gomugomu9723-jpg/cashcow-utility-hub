@@ -2,41 +2,41 @@ import Link from 'next/link'
 import ToolCard from '../components/ToolCard'
 import Head from 'next/head'
 import {useRouter} from 'next/router'
-import {defaultLocale, getTranslation, getToolTranslation} from '../lib/i18n'
+import {getLocalizedHref, getQueryLocale, getTranslation, getToolTranslation} from '../lib/i18n'
 
 const toolSlugs = [
   'bmi-calculator',
   'loan-calculator',
   'dday-calculator',
   'unit-converter',
-  'qr-code-generator'
+  'qr-code-generator',
 ]
 
-export default function Home(){
+export default function Home() {
   const router = useRouter()
-  const locale = router.locale || defaultLocale
+  const locale = getQueryLocale(router)
   const tools = toolSlugs.map(slug => ({
     slug,
     title: getToolTranslation(locale, slug, 'title'),
-    description: getToolTranslation(locale, slug, 'description')
+    description: getToolTranslation(locale, slug, 'description'),
   }))
 
   return (
     <>
       <Head>
-        <title>{getTranslation(locale, ['home', 'heroTitle'], 'Utility Hub — Online Browser Tools')}</title>
-        <meta name="description" content={getTranslation(locale, ['home', 'heroDescription'], 'Small, fast browser-only utility tools.') } />
+        <title>{getTranslation(locale, ['home', 'heroTitle'], 'Utility Hub - Online Browser Tools')}</title>
+        <meta name="description" content={getTranslation(locale, ['home', 'heroDescription'], 'Small, fast browser-only utility tools.')} />
       </Head>
 
       <section className="hero-panel mb-8">
         <div className="grid gap-8 lg:grid-cols-[1.3fr_0.9fr] lg:items-center">
           <div>
-            <div className="brand-pill">{getTranslation(locale, ['common', 'quickTool'], '간편한 브라우저 도구')}</div>
+            <div className="brand-pill">{getTranslation(locale, ['common', 'quickTool'], 'Quick tool')}</div>
             <h1 className="mt-6 text-5xl font-bold tracking-tight text-slate-900 sm:text-[3.8rem]">{getTranslation(locale, ['home', 'heroTitle'])}</h1>
             <p className="mt-4 max-w-2xl text-base leading-8 text-slate-600">{getTranslation(locale, ['home', 'heroDescription'])}</p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <Link href="/tools/bmi-calculator" locale={locale} className="btn-primary">{getTranslation(locale, ['home', 'cta'])}</Link>
-              <Link href="/about" locale={locale} className="text-sm font-medium text-slate-700 hover:text-emerald-600">{getTranslation(locale, ['home', 'learnMore'])}</Link>
+              <Link href={getLocalizedHref('/tools/bmi-calculator', locale)} className="btn-primary">{getTranslation(locale, ['home', 'cta'])}</Link>
+              <Link href={getLocalizedHref('/about', locale)} className="text-sm font-medium text-slate-700 hover:text-emerald-600">{getTranslation(locale, ['home', 'learnMore'])}</Link>
             </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">

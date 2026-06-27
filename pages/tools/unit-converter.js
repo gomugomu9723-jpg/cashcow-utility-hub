@@ -3,7 +3,7 @@ import FAQ from '../../components/FAQ'
 import RelatedTools from '../../components/RelatedTools'
 import {useRouter} from 'next/router'
 import {useState, useMemo} from 'react'
-import {defaultLocale, getToolTranslation, getTranslation} from '../../lib/i18n'
+import {getQueryLocale, getToolTranslation, getTranslation} from '../../lib/i18n'
 
 const converters = {
   length: {
@@ -50,7 +50,7 @@ const converters = {
 
 export default function UnitConverter(){
   const router = useRouter()
-  const locale = router.locale || defaultLocale
+  const locale = getQueryLocale(router)
   const title = getToolTranslation(locale, 'unit-converter', 'title')
   const description = getToolTranslation(locale, 'unit-converter', 'description')
 

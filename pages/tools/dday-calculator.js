@@ -3,11 +3,11 @@ import FAQ from '../../components/FAQ'
 import RelatedTools from '../../components/RelatedTools'
 import {useRouter} from 'next/router'
 import {useState} from 'react'
-import {defaultLocale, getToolTranslation, getTranslation} from '../../lib/i18n'
+import {getQueryLocale, getToolTranslation, getTranslation} from '../../lib/i18n'
 
 export default function DDay(){
   const router = useRouter()
-  const locale = router.locale || defaultLocale
+  const locale = getQueryLocale(router)
   const title = getToolTranslation(locale, 'dday-calculator', 'title')
   const description = getToolTranslation(locale, 'dday-calculator', 'description')
   const [date, setDate] = useState('')

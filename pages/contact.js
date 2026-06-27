@@ -1,10 +1,10 @@
 import Head from 'next/head'
 import {useRouter} from 'next/router'
-import {defaultLocale, getTranslation, getPageTitle} from '../lib/i18n'
+import {getQueryLocale, getTranslation, getPageTitle} from '../lib/i18n'
 
 export default function Contact(){
   const router = useRouter()
-  const locale = router.locale || defaultLocale
+  const locale = getQueryLocale(router)
 
   return (
     <>

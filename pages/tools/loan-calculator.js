@@ -3,11 +3,11 @@ import FAQ from '../../components/FAQ'
 import RelatedTools from '../../components/RelatedTools'
 import {useRouter} from 'next/router'
 import {useState} from 'react'
-import {defaultLocale, getPageTitle, getToolTranslation, getTranslation} from '../../lib/i18n'
+import {getQueryLocale, getToolTranslation, getTranslation} from '../../lib/i18n'
 
 export default function Loan(){
   const router = useRouter()
-  const locale = router.locale || defaultLocale
+  const locale = getQueryLocale(router)
   const title = getToolTranslation(locale, 'loan-calculator', 'title')
   const description = getToolTranslation(locale, 'loan-calculator', 'description')
   const [principal, setPrincipal] = useState('')

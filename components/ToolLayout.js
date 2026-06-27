@@ -1,11 +1,11 @@
 import Head from 'next/head'
 import AdPlaceholder from './AdPlaceholder'
 
-export default function ToolLayout({title, description, children}){
+export default function ToolLayout({title, description, children}) {
   return (
     <>
       <Head>
-        <title>{title} — Utility Hub</title>
+        <title>{title} - Utility Hub</title>
         <meta name="description" content={description} />
       </Head>
       <article>

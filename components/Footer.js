@@ -1,10 +1,10 @@
 import Link from 'next/link'
 import {useRouter} from 'next/router'
-import {defaultLocale, getTranslation} from '../lib/i18n'
+import {getLocalizedHref, getQueryLocale, getTranslation} from '../lib/i18n'
 
 export default function Footer(){
   const router = useRouter()
-  const locale = router.locale || defaultLocale
+  const locale = getQueryLocale(router)
 
   return (
     <footer className="mt-14">
@@ -12,10 +12,10 @@ export default function Footer(){
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>{getTranslation(locale, ['footer', 'copy'])}</div>
           <div className="space-x-3">
-            <Link href="/privacy-policy" locale={locale} className="underline decoration-emerald-400 decoration-2 underline-offset-4">
+            <Link href={getLocalizedHref('/privacy-policy', locale)} className="underline decoration-emerald-400 decoration-2 underline-offset-4">
               {getTranslation(locale, ['footer', 'privacy'])}
             </Link>
-            <Link href="/terms" locale={locale} className="underline decoration-emerald-400 decoration-2 underline-offset-4">
+            <Link href={getLocalizedHref('/terms', locale)} className="underline decoration-emerald-400 decoration-2 underline-offset-4">
               {getTranslation(locale, ['footer', 'terms'])}
             </Link>
           </div>
