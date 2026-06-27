@@ -1,61 +1,65 @@
-import Link from 'next/link'
-import ToolCard from '../components/ToolCard'
 import Head from 'next/head'
-import {useRouter} from 'next/router'
-import {getLocalizedHref, getQueryLocale, getTranslation, getToolTranslation} from '../lib/i18n'
-
-const toolSlugs = [
-  'bmi-calculator',
-  'loan-calculator',
-  'dday-calculator',
-  'unit-converter',
-  'qr-code-generator',
-]
+import ToolCard from '../components/ToolCard'
+import {allTools, categories, getToolsByCategory} from '../lib/tools'
 
 export default function Home() {
-  const router = useRouter()
-  const locale = getQueryLocale(router)
-  const tools = toolSlugs.map(slug => ({
-    slug,
-    title: getToolTranslation(locale, slug, 'title'),
-    description: getToolTranslation(locale, slug, 'description'),
-  }))
-
   return (
     <>
       <Head>
-        <title>{getTranslation(locale, ['home', 'heroTitle'], 'Utility Hub - Online Browser Tools')}</title>
-        <meta name="description" content={getTranslation(locale, ['home', 'heroDescription'], 'Small, fast browser-only utility tools.')} />
+        <title>Utility Hub - 무료 브라우저 도구 모음</title>
+        <meta name="description" content="계산기, 변환기, 개발자 도구, 보안 도구를 브라우저에서 바로 쓰는 무료 유틸리티 허브입니다." />
       </Head>
 
       <section className="hero-panel mb-8">
-        <div className="grid gap-8 lg:grid-cols-[1.3fr_0.9fr] lg:items-center">
+        <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
           <div>
-            <div className="brand-pill">{getTranslation(locale, ['common', 'quickTool'], 'Quick tool')}</div>
-            <h1 className="mt-6 text-5xl font-bold tracking-tight text-slate-900 sm:text-[3.8rem]">{getTranslation(locale, ['home', 'heroTitle'])}</h1>
-            <p className="mt-4 max-w-2xl text-base leading-8 text-slate-600">{getTranslation(locale, ['home', 'heroDescription'])}</p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <Link href={getLocalizedHref('/tools/bmi-calculator', locale)} className="btn-primary">{getTranslation(locale, ['home', 'cta'])}</Link>
-              <Link href={getLocalizedHref('/about', locale)} className="text-sm font-medium text-slate-700 hover:text-emerald-600">{getTranslation(locale, ['home', 'learnMore'])}</Link>
-            </div>
+            <div className="brand-pill">{allTools.length}+ browser tools</div>
+            <h1 className="mt-6 text-4xl font-bold text-slate-900 sm:text-6xl">필요한 도구를 한곳에 모았습니다.</h1>
+            <p className="mt-4 max-w-2xl text-base leading-8 text-slate-600">
+              The Util Hub의 카테고리를 참고해, 서버 없이 브라우저에서 구현 가능한 계산기와 변환기, 개발자 도구, 보안 도구를 카테고리별로 정리했습니다.
+            </p>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-[28px] border border-emerald-200/70 bg-emerald-50/80 p-6 shadow-sm">
-              <div className="text-sm font-semibold text-emerald-700">{getTranslation(locale, ['home', 'noLogin'])}</div>
-              <p className="mt-3 text-sm text-slate-700">{getTranslation(locale, ['home', 'noSignup'])}</p>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-[28px] border border-emerald-200 bg-emerald-50 p-5">
+              <div className="text-3xl font-bold text-emerald-700">{allTools.length}</div>
+              <div className="mt-1 text-sm font-semibold text-slate-700">도구</div>
             </div>
-            <div className="rounded-[28px] border border-slate-200/70 bg-white p-6 shadow-sm">
-              <div className="text-sm font-semibold text-slate-900">{getTranslation(locale, ['home', 'mobile'])}</div>
-              <p className="mt-3 text-sm text-slate-600">{getTranslation(locale, ['home', 'mobileDesc'])}</p>
+            <div className="rounded-[28px] border border-slate-200 bg-white p-5">
+              <div className="text-3xl font-bold text-slate-900">{categories.length}</div>
+              <div className="mt-1 text-sm font-semibold text-slate-700">카테고리</div>
+            </div>
+            <div className="rounded-[28px] border border-slate-200 bg-white p-5">
+              <div className="text-3xl font-bold text-slate-900">0</div>
+              <div className="mt-1 text-sm font-semibold text-slate-700">로그인</div>
+            </div>
+            <div className="rounded-[28px] border border-emerald-200 bg-emerald-50 p-5">
+              <div className="text-3xl font-bold text-emerald-700">100%</div>
+              <div className="mt-1 text-sm font-semibold text-slate-700">무료</div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-        {tools.map(t => (
-          <ToolCard key={t.slug} slug={t.slug} title={t.title} description={t.description} />
-        ))}
+      <section id="tools" className="space-y-10">
+        {categories.map((category) => {
+          const items = getToolsByCategory(category.id)
+          if (!items.length) return null
+          return (
+            <div key={category.id}>
+              <div className="mb-4 flex items-end justify-between gap-4">
+                <div>
+                  <h2 className="text-2xl font-bold text-slate-900"><span className="mr-2">{category.icon}</span>{category.title}</h2>
+                  <p className="mt-1 text-sm text-slate-500">{items.length}개 도구</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {items.map((tool) => (
+                  <ToolCard key={tool.slug} slug={tool.slug} title={tool.title} description={tool.description} />
+                ))}
+              </div>
+            </div>
+          )
+        })}
       </section>
     </>
   )

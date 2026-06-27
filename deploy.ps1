@@ -11,7 +11,7 @@ if (-not $changes) {
   exit 0
 }
 
-git add .gitignore .github deploy.ps1 components lib pages public styles scripts package.json package-lock.json next.config.js postcss.config.js tailwind.config.js README.md
+git add .gitignore .github deploy.ps1 components lib pages public styles scripts package.json package-lock.json next.config.js postcss.config.js tailwind.config.js wrangler.jsonc worker.js README.md
 git commit -m "Deploy: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
 git push origin main
 

@@ -35,7 +35,7 @@ export default function Header() {
         </div>
 
         <nav className="flex flex-wrap items-center gap-4 text-sm font-medium text-slate-600">
-          <Link href={getLocalizedHref('/tools/bmi-calculator', locale)} className="link-accent">{navText('tools')}</Link>
+          <Link href={getLocalizedHref('/#tools', locale)} className="link-accent">{navText('tools')}</Link>
           <Link href={getLocalizedHref('/about', locale)} className="link-accent">{navText('about')}</Link>
           <Link href={getLocalizedHref('/contact', locale)} className="link-accent">{navText('contact')}</Link>
         </nav>
