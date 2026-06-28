@@ -1,5 +1,8 @@
 export default {
-  fetch(request, env) {
+  async fetch(request, env) {
+    const response = await env.ASSETS.fetch(request)
+    if (response.status !== 404) return response
+
     const url = new URL(request.url)
     const parts = url.pathname.split('/').filter(Boolean)
     const locales = new Set(['ko', 'en', 'ja', 'zh', 'es', 'fr'])
@@ -13,6 +16,6 @@ export default {
       return env.ASSETS.fetch(new Request(nextUrl, request))
     }
 
-    return env.ASSETS.fetch(request)
+    return response
   },
 }
