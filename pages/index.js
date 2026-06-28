@@ -2,7 +2,13 @@ import Head from 'next/head'
 import ToolCard from '../components/ToolCard'
 import {useRouter} from 'next/router'
 import {allTools, categories, getToolsByCategory} from '../lib/tools'
-import {getQueryLocale, getTranslation} from '../lib/i18n'
+import {
+  getCategoryTranslation,
+  getQueryLocale,
+  getToolDisplayDescription,
+  getToolDisplayTitle,
+  getTranslation,
+} from '../lib/i18n'
 
 export default function Home() {
   const router = useRouter()
@@ -64,7 +70,7 @@ export default function Home() {
                 <div>
                   <h2 className="text-2xl font-bold text-slate-900">
                     <span className="mr-2">{category.icon}</span>
-                    {category.title}
+                    {getCategoryTranslation(locale, category.id, category.title)}
                   </h2>
                   <p className="mt-1 text-sm text-slate-500">
                     {items.length} {getTranslation(locale, ['home', 'categoryCount'], 'tools')}
@@ -73,7 +79,12 @@ export default function Home() {
               </div>
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {items.map((tool) => (
-                  <ToolCard key={tool.slug} slug={tool.slug} title={tool.title} description={tool.description} />
+                  <ToolCard
+                    key={tool.slug}
+                    slug={tool.slug}
+                    title={getToolDisplayTitle(locale, tool)}
+                    description={getToolDisplayDescription(locale, tool)}
+                  />
                 ))}
               </div>
             </div>
