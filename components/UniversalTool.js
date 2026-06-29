@@ -1,4 +1,6 @@
 import {useMemo, useState} from 'react'
+import {useRouter} from 'next/router'
+import {getQueryLocale} from '../lib/i18n'
 
 const number = (value) => {
   const parsed = Number(value)
@@ -105,48 +107,118 @@ export default function UniversalTool({tool}) {
 }
 
 function PercentTool() {
+  const router = useRouter()
+  const locale = getQueryLocale(router)
   const [base, setBase] = useState('100')
   const [value, setValue] = useState('15')
   const b = number(base)
   const v = number(value)
-  return <div className="card space-y-3"><Field label="기준값" value={base} onChange={setBase} /><Field label="비교값 / 퍼센트" value={value} onChange={setValue} /><Result><div>{fmt(b)}의 {fmt(v)}% = <b>{fmt(b * v / 100)}</b></div><div>{fmt(v)}는 {fmt(b)}의 <b>{b ? fmt(v / b * 100) : 0}%</b></div><div>변화율: <b>{b ? fmt((v - b) / b * 100) : 0}%</b></div></Result></div>
+  const labels = {
+    ko: {base: '기준값', value: '비교값 / 퍼센트', of: '의', is: '는', change: '변화율'},
+    en: {base: 'Base value', value: 'Comparison value / percent', of: 'of', is: 'is', change: 'Change rate'},
+    ja: {base: '基準値', value: '比較値 / パーセント', of: 'の', is: 'は', change: '変化率'},
+    zh: {base: '基准值', value: '比较值 / 百分比', of: '的', is: '是', change: '变化率'},
+    es: {base: 'Valor base', value: 'Valor comparado / porcentaje', of: 'de', is: 'es', change: 'Tasa de cambio'},
+    fr: {base: 'Valeur de base', value: 'Valeur comparée / pourcentage', of: 'de', is: 'vaut', change: 'Taux de variation'},
+  }
+  const t = labels[locale] || labels.en
+  return <div className="card space-y-3"><Field label={t.base} value={base} onChange={setBase} /><Field label={t.value} value={value} onChange={setValue} /><Result><div>{fmt(v)}% {t.of} {fmt(b)} = <b>{fmt(b * v / 100)}</b></div><div>{fmt(v)} {t.is} <b>{b ? fmt(v / b * 100) : 0}%</b> {t.of} {fmt(b)}</div><div>{t.change}: <b>{b ? fmt((v - b) / b * 100) : 0}%</b></div></Result></div>
 }
 
 function VatTool() {
+  const router = useRouter()
+  const locale = getQueryLocale(router)
   const [amount, setAmount] = useState('100000')
+  const [rate, setRate] = useState(locale === 'ja' ? '10' : locale === 'fr' ? '20' : locale === 'es' ? '21' : '10')
   const a = number(amount)
-  return <div className="card space-y-3"><Field label="금액" value={amount} onChange={setAmount} /><Result><div>공급가액 기준 부가세: <b>{fmt(a * 0.1)}원</b>, 합계 <b>{fmt(a * 1.1)}원</b></div><div>부가세 포함 금액이라면 공급가액 <b>{fmt(a / 1.1)}원</b>, 부가세 <b>{fmt(a - a / 1.1)}원</b></div></Result></div>
+  const r = Math.max(0, Math.min(100, number(rate))) / 100
+  const labels = {
+    ko: {amount: '금액', rate: '세율 (%)', tax: '세액', total: '세금 포함 합계', base: '세전 금액', included: '입력값이 세금 포함 금액이라면'},
+    en: {amount: 'Amount', rate: 'Tax rate (%)', tax: 'Tax amount', total: 'Tax-included total', base: 'Pre-tax amount', included: 'If the input already includes tax'},
+    ja: {amount: '金額', rate: '税率 (%)', tax: '税額', total: '税込合計', base: '税抜金額', included: '入力が税込金額の場合'},
+    zh: {amount: '金额', rate: '税率 (%)', tax: '税额', total: '含税总额', base: '税前金额', included: '如果输入值已含税'},
+    es: {amount: 'Importe', rate: 'Tipo impositivo (%)', tax: 'Impuesto', total: 'Total con impuesto', base: 'Importe antes de impuesto', included: 'Si el importe ya incluye impuesto'},
+    fr: {amount: 'Montant', rate: 'Taux de taxe (%)', tax: 'Taxe', total: 'Total TTC', base: 'Montant HT', included: 'Si le montant inclut déjà la taxe'},
+  }
+  const t = labels[locale] || labels.en
+  return <div className="card space-y-3"><Field label={t.amount} value={amount} onChange={setAmount} /><Field label={t.rate} value={rate} onChange={setRate} /><Result><div>{t.tax}: <b>{fmt(a * r)}</b>, {t.total}: <b>{fmt(a * (1 + r))}</b></div><div>{t.included}: {t.base} <b>{fmt(a / (1 + r))}</b>, {t.tax} <b>{fmt(a - a / (1 + r))}</b></div></Result></div>
 }
 
 function Tax33Tool() {
+  const router = useRouter()
+  const locale = getQueryLocale(router)
   const [amount, setAmount] = useState('1000000')
+  const [rate, setRate] = useState(locale === 'ko' ? '3.3' : '10')
   const a = number(amount)
-  return <div className="card space-y-3"><Field label="계약/지급 금액" value={amount} onChange={setAmount} /><Result><div>3.3% 세금: <b>{fmt(a * 0.033)}원</b></div><div>실수령액: <b>{fmt(a * 0.967)}원</b></div><div>실수령액이 이 금액이라면 세전: <b>{fmt(a / 0.967)}원</b></div></Result></div>
+  const r = Math.max(0, Math.min(100, number(rate))) / 100
+  const labels = {
+    ko: {amount: '계약/지급 금액', rate: '공제 세율 (%)', tax: '공제 세액', net: '공제 후 금액', gross: '이 금액을 실수령액으로 받으려면 세전 금액'},
+    en: {amount: 'Contract or payment amount', rate: 'Withholding rate (%)', tax: 'Tax withheld', net: 'After-tax amount', gross: 'Gross amount needed for this net amount'},
+    ja: {amount: '契約・支払金額', rate: '源泉徴収率 (%)', tax: '控除税額', net: '控除後金額', gross: 'この手取り額に必要な税引前金額'},
+    zh: {amount: '合同或支付金额', rate: '预扣税率 (%)', tax: '预扣税额', net: '税后金额', gross: '获得该税后金额所需的税前金额'},
+    es: {amount: 'Importe del contrato o pago', rate: 'Tasa de retención (%)', tax: 'Impuesto retenido', net: 'Importe después de impuestos', gross: 'Importe bruto necesario para este neto'},
+    fr: {amount: 'Montant du contrat ou paiement', rate: 'Taux de retenue (%)', tax: 'Impôt retenu', net: 'Montant après impôt', gross: 'Montant brut nécessaire pour ce net'},
+  }
+  const t = labels[locale] || labels.en
+  return <div className="card space-y-3"><Field label={t.amount} value={amount} onChange={setAmount} /><Field label={t.rate} value={rate} onChange={setRate} /><Result><div>{t.tax}: <b>{fmt(a * r)}</b></div><div>{t.net}: <b>{fmt(a * (1 - r))}</b></div><div>{t.gross}: <b>{fmt((1 - r) ? a / (1 - r) : 0)}</b></div></Result></div>
 }
 
 function InterestTool() {
+  const router = useRouter()
+  const locale = getQueryLocale(router)
   const [principal, setPrincipal] = useState('1000000')
   const [rate, setRate] = useState('5')
   const [years, setYears] = useState('3')
   const p = number(principal), r = number(rate) / 100, y = number(years)
   const simple = p * (1 + r * y)
   const compound = p * Math.pow(1 + r, y)
-  return <div className="card space-y-3"><Field label="원금" value={principal} onChange={setPrincipal} /><Field label="연 이율 (%)" value={rate} onChange={setRate} /><Field label="기간 (년)" value={years} onChange={setYears} /><Result><div>단리 만기금액: <b>{fmt(simple)}원</b></div><div>복리 만기금액: <b>{fmt(compound)}원</b></div></Result></div>
+  const labels = {
+    ko: {principal: '원금', rate: '연 이율 (%)', years: '기간 (년)', simple: '단리 만기금액', compound: '복리 만기금액'},
+    en: {principal: 'Principal', rate: 'Annual rate (%)', years: 'Term (years)', simple: 'Simple-interest final amount', compound: 'Compound-interest final amount'},
+    ja: {principal: '元本', rate: '年利 (%)', years: '期間 (年)', simple: '単利の満期金額', compound: '複利の満期金額'},
+    zh: {principal: '本金', rate: '年利率 (%)', years: '期限 (年)', simple: '单利到期金额', compound: '复利到期金额'},
+    es: {principal: 'Principal', rate: 'Tasa anual (%)', years: 'Plazo (años)', simple: 'Importe final con interés simple', compound: 'Importe final con interés compuesto'},
+    fr: {principal: 'Capital', rate: 'Taux annuel (%)', years: 'Durée (années)', simple: 'Montant final en intérêt simple', compound: 'Montant final en intérêt composé'},
+  }
+  const t = labels[locale] || labels.en
+  return <div className="card space-y-3"><Field label={t.principal} value={principal} onChange={setPrincipal} /><Field label={t.rate} value={rate} onChange={setRate} /><Field label={t.years} value={years} onChange={setYears} /><Result><div>{t.simple}: <b>{fmt(simple)}</b></div><div>{t.compound}: <b>{fmt(compound)}</b></div></Result></div>
 }
 
 function CryptoTool() {
+  const router = useRouter()
+  const locale = getQueryLocale(router)
   const [buy, setBuy] = useState('100')
   const [sell, setSell] = useState('120')
   const [qty, setQty] = useState('10')
   const cost = number(buy) * number(qty)
   const revenue = number(sell) * number(qty)
-  return <div className="card space-y-3"><Field label="매수가" value={buy} onChange={setBuy} /><Field label="매도가" value={sell} onChange={setSell} /><Field label="수량" value={qty} onChange={setQty} /><Result><div>손익: <b>{fmt(revenue - cost)}원</b></div><div>수익률: <b>{cost ? fmt((revenue - cost) / cost * 100) : 0}%</b></div></Result></div>
+  const labels = {
+    ko: {buy: '매수가', sell: '매도가', qty: '수량', pnl: '손익', roi: '수익률'},
+    en: {buy: 'Buy price', sell: 'Sell price', qty: 'Quantity', pnl: 'Profit / loss', roi: 'Return'},
+    ja: {buy: '購入価格', sell: '売却価格', qty: '数量', pnl: '損益', roi: '利回り'},
+    zh: {buy: '买入价', sell: '卖出价', qty: '数量', pnl: '盈亏', roi: '收益率'},
+    es: {buy: 'Precio de compra', sell: 'Precio de venta', qty: 'Cantidad', pnl: 'Ganancia / pérdida', roi: 'Rentabilidad'},
+    fr: {buy: 'Prix d’achat', sell: 'Prix de vente', qty: 'Quantité', pnl: 'Gain / perte', roi: 'Rendement'},
+  }
+  const t = labels[locale] || labels.en
+  return <div className="card space-y-3"><Field label={t.buy} value={buy} onChange={setBuy} /><Field label={t.sell} value={sell} onChange={setSell} /><Field label={t.qty} value={qty} onChange={setQty} /><Result><div>{t.pnl}: <b>{fmt(revenue - cost)}</b></div><div>{t.roi}: <b>{cost ? fmt((revenue - cost) / cost * 100) : 0}%</b></div></Result></div>
 }
 
 function AreaTool() {
+  const router = useRouter()
+  const locale = getQueryLocale(router)
   const [pyeong, setPyeong] = useState('24')
   const p = number(pyeong)
-  return <div className="card space-y-3"><Field label="평" value={pyeong} onChange={setPyeong} /><Result><div>{fmt(p)}평 = <b>{fmt(p * 3.305785)}㎡</b></div><div>{fmt(p)}㎡ = <b>{fmt(p / 3.305785)}평</b></div></Result></div>
+  const labels = {
+    ko: {input: '평', pyeong: '평'},
+    en: {input: 'Pyeong', pyeong: 'pyeong'},
+    ja: {input: '坪数', pyeong: '坪'},
+    zh: {input: '坪数', pyeong: '坪'},
+    es: {input: 'Pyeong', pyeong: 'pyeong'},
+    fr: {input: 'Pyeong', pyeong: 'pyeong'},
+  }
+  const t = labels[locale] || labels.en
+  return <div className="card space-y-3"><Field label={t.input} value={pyeong} onChange={setPyeong} /><Result><div>{fmt(p)} {t.pyeong} = <b>{fmt(p * 3.305785)}㎡</b></div><div>{fmt(p)}㎡ = <b>{fmt(p / 3.305785)} {t.pyeong}</b></div></Result></div>
 }
 
 function TextTool() {
@@ -545,25 +617,69 @@ function BusinessDayTool() {
 }
 
 function TipTool() {
+  const router = useRouter()
+  const locale = getQueryLocale(router)
   const [bill, setBill] = useState('50000'), [tip, setTip] = useState('10'), [people, setPeople] = useState('2')
   const total = number(bill) * (1 + number(tip)/100)
-  return <div className="card space-y-3"><Field label="금액" value={bill} onChange={setBill} /><Field label="팁 %" value={tip} onChange={setTip} /><Field label="인원" value={people} onChange={setPeople} /><Result>총액 <b>{fmt(total)}원</b> / 1인 <b>{fmt(total / Math.max(1, number(people)))}원</b></Result></div>
+  const labels = {
+    ko: {bill: '금액', tip: '팁 %', people: '인원', total: '총액', each: '1인'},
+    en: {bill: 'Bill amount', tip: 'Tip %', people: 'People', total: 'Total', each: 'Per person'},
+    ja: {bill: '金額', tip: 'チップ %', people: '人数', total: '合計', each: '1人あたり'},
+    zh: {bill: '账单金额', tip: '小费 %', people: '人数', total: '总额', each: '每人'},
+    es: {bill: 'Importe', tip: 'Propina %', people: 'Personas', total: 'Total', each: 'Por persona'},
+    fr: {bill: 'Montant', tip: 'Pourboire %', people: 'Personnes', total: 'Total', each: 'Par personne'},
+  }
+  const t = labels[locale] || labels.en
+  return <div className="card space-y-3"><Field label={t.bill} value={bill} onChange={setBill} /><Field label={t.tip} value={tip} onChange={setTip} /><Field label={t.people} value={people} onChange={setPeople} /><Result>{t.total} <b>{fmt(total)}</b> / {t.each} <b>{fmt(total / Math.max(1, number(people)))}</b></Result></div>
 }
 
 function DiscountTool() {
+  const router = useRouter()
+  const locale = getQueryLocale(router)
   const [price, setPrice] = useState('100000'), [rate, setRate] = useState('20')
   const sale = number(price) * (1 - number(rate)/100)
-  return <div className="card space-y-3"><Field label="정가" value={price} onChange={setPrice} /><Field label="할인율 %" value={rate} onChange={setRate} /><Result>할인가 <b>{fmt(sale)}원</b> / 절약 <b>{fmt(number(price)-sale)}원</b></Result></div>
+  const labels = {
+    ko: {price: '정가', rate: '할인율 %', sale: '할인가', saved: '절약'},
+    en: {price: 'Original price', rate: 'Discount %', sale: 'Sale price', saved: 'Savings'},
+    ja: {price: '定価', rate: '割引率 %', sale: '割引後価格', saved: '節約額'},
+    zh: {price: '原价', rate: '折扣率 %', sale: '折后价', saved: '节省'},
+    es: {price: 'Precio original', rate: 'Descuento %', sale: 'Precio final', saved: 'Ahorro'},
+    fr: {price: 'Prix initial', rate: 'Remise %', sale: 'Prix remisé', saved: 'Économie'},
+  }
+  const t = labels[locale] || labels.en
+  return <div className="card space-y-3"><Field label={t.price} value={price} onChange={setPrice} /><Field label={t.rate} value={rate} onChange={setRate} /><Result>{t.sale} <b>{fmt(sale)}</b> / {t.saved} <b>{fmt(number(price)-sale)}</b></Result></div>
 }
 
 function SalaryTool() {
+  const router = useRouter()
+  const locale = getQueryLocale(router)
   const [hourly, setHourly] = useState('10000'), [hours, setHours] = useState('40')
-  return <div className="card space-y-3"><Field label="시급" value={hourly} onChange={setHourly} /><Field label="주 근무시간" value={hours} onChange={setHours} /><Result>월급 추정 <b>{fmt(number(hourly)*number(hours)*4.345)}원</b> / 연봉 <b>{fmt(number(hourly)*number(hours)*52)}원</b></Result></div>
+  const labels = {
+    ko: {hourly: '시급', hours: '주 근무시간', monthly: '월급 추정', annual: '연봉'},
+    en: {hourly: 'Hourly pay', hours: 'Weekly hours', monthly: 'Estimated monthly pay', annual: 'Annual salary'},
+    ja: {hourly: '時給', hours: '週の勤務時間', monthly: '月給見積もり', annual: '年収'},
+    zh: {hourly: '时薪', hours: '每周工时', monthly: '预估月薪', annual: '年薪'},
+    es: {hourly: 'Pago por hora', hours: 'Horas semanales', monthly: 'Pago mensual estimado', annual: 'Salario anual'},
+    fr: {hourly: 'Taux horaire', hours: 'Heures hebdomadaires', monthly: 'Paie mensuelle estimée', annual: 'Salaire annuel'},
+  }
+  const t = labels[locale] || labels.en
+  return <div className="card space-y-3"><Field label={t.hourly} value={hourly} onChange={setHourly} /><Field label={t.hours} value={hours} onChange={setHours} /><Result>{t.monthly} <b>{fmt(number(hourly)*number(hours)*4.345)}</b> / {t.annual} <b>{fmt(number(hourly)*number(hours)*52)}</b></Result></div>
 }
 
 function FuelTool() {
+  const router = useRouter()
+  const locale = getQueryLocale(router)
   const [km, setKm] = useState('100'), [eff, setEff] = useState('12'), [price, setPrice] = useState('1700')
-  return <div className="card space-y-3"><Field label="거리(km)" value={km} onChange={setKm} /><Field label="연비(km/L)" value={eff} onChange={setEff} /><Field label="유가(원/L)" value={price} onChange={setPrice} /><Result>예상 주유비: <b>{fmt(number(km)/number(eff)*number(price))}원</b></Result></div>
+  const labels = {
+    ko: {km: '거리(km)', eff: '연비(km/L)', price: '연료 단가 / L', cost: '예상 연료비'},
+    en: {km: 'Distance (km)', eff: 'Efficiency (km/L)', price: 'Fuel price / L', cost: 'Estimated fuel cost'},
+    ja: {km: '距離(km)', eff: '燃費(km/L)', price: '燃料単価 / L', cost: '推定燃料費'},
+    zh: {km: '距离(km)', eff: '油耗效率(km/L)', price: '燃油单价 / L', cost: '预估燃油费'},
+    es: {km: 'Distancia (km)', eff: 'Eficiencia (km/L)', price: 'Precio de combustible / L', cost: 'Coste estimado'},
+    fr: {km: 'Distance (km)', eff: 'Rendement (km/L)', price: 'Prix du carburant / L', cost: 'Coût estimé'},
+  }
+  const t = labels[locale] || labels.en
+  return <div className="card space-y-3"><Field label={t.km} value={km} onChange={setKm} /><Field label={t.eff} value={eff} onChange={setEff} /><Field label={t.price} value={price} onChange={setPrice} /><Result>{t.cost}: <b>{fmt(number(km)/number(eff)*number(price))}</b></Result></div>
 }
 
 function WaterTool() {
