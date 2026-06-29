@@ -1,4 +1,4 @@
-import {useMemo, useState} from 'react'
+import {useEffect, useMemo, useState} from 'react'
 import {useRouter} from 'next/router'
 import {getQueryLocale} from '../lib/i18n'
 
@@ -20,6 +20,172 @@ function Field({label, value, onChange, type = 'number', placeholder}) {
 
 function Result({children}) {
   return <div className="mt-5 rounded-2xl bg-emerald-50 p-4 text-sm text-slate-800">{children}</div>
+}
+
+function useLocaleText(groups) {
+  const router = useRouter()
+  const locale = getQueryLocale(router)
+  return groups[locale] || groups.en
+}
+
+const controlText = {
+  ko: {
+    min: '최소값',
+    max: '최대값',
+    roll: '굴리기',
+    flip: '던지기',
+    sides: '면 수',
+    heads: '앞면',
+    tails: '뒷면',
+    start: '시작',
+    pause: '일시정지',
+    reset: '초기화',
+    set: '설정',
+    minutes: '분',
+    seconds: '초',
+    remaining: '남은 시간',
+    elapsed: '경과 시간',
+    done: '완료',
+    birth: '생년월일',
+    age: '만 나이',
+    years: '세',
+    from: '시작일',
+    to: '종료일',
+    businessDays: '영업일',
+    days: '일',
+  },
+  en: {
+    min: 'Minimum',
+    max: 'Maximum',
+    roll: 'Roll',
+    flip: 'Flip',
+    sides: 'Sides',
+    heads: 'Heads',
+    tails: 'Tails',
+    start: 'Start',
+    pause: 'Pause',
+    reset: 'Reset',
+    set: 'Set',
+    minutes: 'Minutes',
+    seconds: 'Seconds',
+    remaining: 'Remaining',
+    elapsed: 'Elapsed',
+    done: 'Done',
+    birth: 'Birth date',
+    age: 'Age',
+    years: 'years old',
+    from: 'Start date',
+    to: 'End date',
+    businessDays: 'Business days',
+    days: 'days',
+  },
+  ja: {
+    min: '最小値',
+    max: '最大値',
+    roll: '振る',
+    flip: '投げる',
+    sides: '面数',
+    heads: '表',
+    tails: '裏',
+    start: '開始',
+    pause: '一時停止',
+    reset: 'リセット',
+    set: '設定',
+    minutes: '分',
+    seconds: '秒',
+    remaining: '残り時間',
+    elapsed: '経過時間',
+    done: '完了',
+    birth: '生年月日',
+    age: '年齢',
+    years: '歳',
+    from: '開始日',
+    to: '終了日',
+    businessDays: '営業日',
+    days: '日',
+  },
+  zh: {
+    min: '最小值',
+    max: '最大值',
+    roll: '掷骰',
+    flip: '抛掷',
+    sides: '面数',
+    heads: '正面',
+    tails: '反面',
+    start: '开始',
+    pause: '暂停',
+    reset: '重置',
+    set: '设置',
+    minutes: '分钟',
+    seconds: '秒',
+    remaining: '剩余时间',
+    elapsed: '经过时间',
+    done: '完成',
+    birth: '出生日期',
+    age: '年龄',
+    years: '岁',
+    from: '开始日期',
+    to: '结束日期',
+    businessDays: '工作日',
+    days: '天',
+  },
+  es: {
+    min: 'Mínimo',
+    max: 'Máximo',
+    roll: 'Lanzar',
+    flip: 'Lanzar',
+    sides: 'Caras',
+    heads: 'Cara',
+    tails: 'Cruz',
+    start: 'Iniciar',
+    pause: 'Pausar',
+    reset: 'Reiniciar',
+    set: 'Aplicar',
+    minutes: 'Minutos',
+    seconds: 'Segundos',
+    remaining: 'Tiempo restante',
+    elapsed: 'Tiempo transcurrido',
+    done: 'Completado',
+    birth: 'Fecha de nacimiento',
+    age: 'Edad',
+    years: 'años',
+    from: 'Fecha inicial',
+    to: 'Fecha final',
+    businessDays: 'Días laborables',
+    days: 'días',
+  },
+  fr: {
+    min: 'Minimum',
+    max: 'Maximum',
+    roll: 'Lancer',
+    flip: 'Lancer',
+    sides: 'Faces',
+    heads: 'Pile',
+    tails: 'Face',
+    start: 'Démarrer',
+    pause: 'Pause',
+    reset: 'Réinitialiser',
+    set: 'Appliquer',
+    minutes: 'Minutes',
+    seconds: 'Secondes',
+    remaining: 'Temps restant',
+    elapsed: 'Temps écoulé',
+    done: 'Terminé',
+    birth: 'Date de naissance',
+    age: 'Âge',
+    years: 'ans',
+    from: 'Date de début',
+    to: 'Date de fin',
+    businessDays: 'Jours ouvrés',
+    days: 'jours',
+  },
+}
+
+const formatDuration = (totalSeconds) => {
+  const safe = Math.max(0, Math.floor(totalSeconds))
+  const minutes = Math.floor(safe / 60)
+  const seconds = safe % 60
+  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
 }
 
 export default function UniversalTool({tool}) {
@@ -81,15 +247,15 @@ export default function UniversalTool({tool}) {
     case 'og': return <OgTool />
     case 'utm': return <UtmTool />
     case 'keyword-density': return <KeywordDensityTool />
-    case 'random-number': return <RandomNumberTool />
+    case 'random-number': return <LocalizedRandomNumberTool />
     case 'list-random': return <ListRandomTool />
     case 'team': return <TeamTool />
-    case 'dice': return <DiceTool />
-    case 'coin': return <CoinTool />
-    case 'stopwatch': return <StopwatchTool />
-    case 'countdown': return <CountdownTool />
-    case 'age': return <AgeTool />
-    case 'business-day': return <BusinessDayTool />
+    case 'dice': return <LocalizedDiceTool />
+    case 'coin': return <LocalizedCoinTool />
+    case 'stopwatch': return <LocalizedStopwatchTool />
+    case 'countdown': return <LocalizedCountdownTool />
+    case 'age': return <LocalizedAgeTool />
+    case 'business-day': return <LocalizedBusinessDayTool />
     case 'tip': return <TipTool />
     case 'discount': return <DiscountTool />
     case 'salary': return <SalaryTool />
@@ -559,6 +725,176 @@ function KeywordDensityTool() {
   const words = text.toLowerCase().match(/\S+/g) || []
   const hits = words.filter((w) => w.includes(kw.toLowerCase())).length
   return <div className="card space-y-3"><Field label="키워드" type="text" value={kw} onChange={setKw} /><textarea className="min-h-[130px] w-full rounded-xl border border-slate-200 p-3" value={text} onChange={(e) => setText(e.target.value)} /><Result>밀도: <b>{words.length ? fmt(hits / words.length * 100) : 0}%</b> ({hits}/{words.length})</Result></div>
+}
+
+function LocalizedRandomNumberTool() {
+  const t = useLocaleText(controlText)
+  const [min, setMin] = useState('1')
+  const [max, setMax] = useState('100')
+  const [value, setValue] = useState(42)
+  const lower = Math.min(number(min), number(max))
+  const upper = Math.max(number(min), number(max))
+  const pick = () => setValue(Math.floor(Math.random() * (upper - lower + 1)) + lower)
+
+  useEffect(() => {
+    pick()
+  }, [])
+
+  return (
+    <div className="card space-y-3">
+      <Field label={t.min} value={min} onChange={setMin} />
+      <Field label={t.max} value={max} onChange={setMax} />
+      <button className="btn-primary" onClick={pick}>{t.roll}</button>
+      <Result><b className="text-3xl">{value}</b></Result>
+    </div>
+  )
+}
+
+function LocalizedDiceTool() {
+  const t = useLocaleText(controlText)
+  const [sides, setSides] = useState('6')
+  const [value, setValue] = useState(1)
+  const roll = () => {
+    const faces = Math.max(2, Math.floor(number(sides)))
+    setValue(Math.floor(Math.random() * faces) + 1)
+  }
+
+  useEffect(() => {
+    roll()
+  }, [])
+
+  return (
+    <div className="card space-y-3">
+      <Field label={t.sides} value={sides} onChange={setSides} />
+      <button className="btn-primary" onClick={roll}>{t.roll}</button>
+      <Result><b className="text-3xl">{value}</b></Result>
+    </div>
+  )
+}
+
+function LocalizedCoinTool() {
+  const t = useLocaleText(controlText)
+  const [side, setSide] = useState(t.heads)
+  const flip = () => setSide(Math.random() < 0.5 ? t.heads : t.tails)
+
+  useEffect(() => {
+    setSide(t.heads)
+  }, [t.heads])
+
+  return (
+    <div className="card space-y-3">
+      <button className="btn-primary" onClick={flip}>{t.flip}</button>
+      <Result><b className="text-3xl">{side}</b></Result>
+    </div>
+  )
+}
+
+function LocalizedStopwatchTool() {
+  const t = useLocaleText(controlText)
+  const [running, setRunning] = useState(false)
+  const [elapsed, setElapsed] = useState(0)
+
+  useEffect(() => {
+    if (!running) return undefined
+    const timer = setInterval(() => setElapsed((current) => current + 1), 1000)
+    return () => clearInterval(timer)
+  }, [running])
+
+  return (
+    <div className="card space-y-3">
+      <div className="flex flex-wrap gap-2">
+        <button className="btn-primary" onClick={() => setRunning((value) => !value)}>{running ? t.pause : t.start}</button>
+        <button className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold" onClick={() => { setRunning(false); setElapsed(0) }}>{t.reset}</button>
+      </div>
+      <Result>{t.elapsed}: <b className="text-3xl">{formatDuration(elapsed)}</b></Result>
+    </div>
+  )
+}
+
+function LocalizedCountdownTool() {
+  const t = useLocaleText(controlText)
+  const [minutes, setMinutes] = useState('10')
+  const [seconds, setSeconds] = useState('0')
+  const [remaining, setRemaining] = useState(600)
+  const [running, setRunning] = useState(false)
+  const total = Math.max(0, Math.floor(number(minutes) * 60 + number(seconds)))
+
+  useEffect(() => {
+    if (!running) setRemaining(total)
+  }, [running, total])
+
+  useEffect(() => {
+    if (!running) return undefined
+    const timer = setInterval(() => {
+      setRemaining((current) => {
+        if (current <= 1) {
+          clearInterval(timer)
+          setRunning(false)
+          return 0
+        }
+        return current - 1
+      })
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [running])
+
+  const applyTime = () => {
+    setRunning(false)
+    setRemaining(total)
+  }
+
+  return (
+    <div className="card space-y-3">
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Field label={t.minutes} value={minutes} onChange={setMinutes} />
+        <Field label={t.seconds} value={seconds} onChange={setSeconds} />
+      </div>
+      <div className="flex flex-wrap gap-2">
+        <button className="btn-primary" onClick={() => setRunning((value) => remaining > 0 && !value)}>{running ? t.pause : t.start}</button>
+        <button className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold" onClick={applyTime}>{t.set}</button>
+        <button className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold" onClick={() => { setRunning(false); setRemaining(total) }}>{t.reset}</button>
+      </div>
+      <Result>{remaining === 0 ? t.done : t.remaining}: <b className="text-3xl">{formatDuration(remaining)}</b></Result>
+    </div>
+  )
+}
+
+function LocalizedAgeTool() {
+  const t = useLocaleText(controlText)
+  const [birth, setBirth] = useState('2000-01-01')
+  const b = new Date(birth)
+  const n = new Date()
+  let age = n.getFullYear() - b.getFullYear()
+  if (n < new Date(n.getFullYear(), b.getMonth(), b.getDate())) age -= 1
+
+  return (
+    <div className="card space-y-3">
+      <Field label={t.birth} type="date" value={birth} onChange={setBirth} />
+      <Result>{t.age}: <b>{age} {t.years}</b></Result>
+    </div>
+  )
+}
+
+function LocalizedBusinessDayTool() {
+  const t = useLocaleText(controlText)
+  const [a, setA] = useState('2026-01-01')
+  const [b, setB] = useState('2026-01-31')
+  let count = 0
+  const d = new Date(a)
+  const end = new Date(b)
+  while (d <= end) {
+    const day = d.getDay()
+    if (day !== 0 && day !== 6) count += 1
+    d.setDate(d.getDate() + 1)
+  }
+
+  return (
+    <div className="card space-y-3">
+      <Field label={t.from} type="date" value={a} onChange={setA} />
+      <Field label={t.to} type="date" value={b} onChange={setB} />
+      <Result>{t.businessDays}: <b>{count} {t.days}</b></Result>
+    </div>
+  )
 }
 
 function RandomNumberTool() {
