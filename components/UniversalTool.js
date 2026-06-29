@@ -46,6 +46,15 @@ const controlText = {
     remaining: '남은 시간',
     elapsed: '경과 시간',
     done: '완료',
+    countdown: '카운트다운',
+    clockAlarm: '시각 알람',
+    alarmTime: '알람 시각',
+    alarmReady: '설정된 시각에 알람이 울립니다',
+    alarmPassed: '오늘은 이미 지난 시각입니다',
+    alarmRinging: '알람 울림',
+    stopAlarm: '알람 끄기',
+    testSound: '소리 테스트',
+    soundOn: '소리 켜짐',
     birth: '생년월일',
     age: '만 나이',
     years: '세',
@@ -71,6 +80,15 @@ const controlText = {
     remaining: 'Remaining',
     elapsed: 'Elapsed',
     done: 'Done',
+    countdown: 'Countdown',
+    clockAlarm: 'Clock alarm',
+    alarmTime: 'Alarm time',
+    alarmReady: 'The alarm will ring at the selected time',
+    alarmPassed: 'That time has already passed today',
+    alarmRinging: 'Alarm ringing',
+    stopAlarm: 'Stop alarm',
+    testSound: 'Test sound',
+    soundOn: 'Sound on',
     birth: 'Birth date',
     age: 'Age',
     years: 'years old',
@@ -96,6 +114,15 @@ const controlText = {
     remaining: '残り時間',
     elapsed: '経過時間',
     done: '完了',
+    countdown: 'カウントダウン',
+    clockAlarm: '時刻アラーム',
+    alarmTime: 'アラーム時刻',
+    alarmReady: '指定した時刻にアラームが鳴ります',
+    alarmPassed: 'その時刻は今日はすでに過ぎています',
+    alarmRinging: 'アラーム鳴動中',
+    stopAlarm: 'アラーム停止',
+    testSound: '音をテスト',
+    soundOn: '音オン',
     birth: '生年月日',
     age: '年齢',
     years: '歳',
@@ -121,6 +148,15 @@ const controlText = {
     remaining: '剩余时间',
     elapsed: '经过时间',
     done: '完成',
+    countdown: '倒计时',
+    clockAlarm: '时刻闹钟',
+    alarmTime: '闹钟时间',
+    alarmReady: '将在设定时间响铃',
+    alarmPassed: '今天该时间已过去',
+    alarmRinging: '闹钟响铃中',
+    stopAlarm: '停止闹钟',
+    testSound: '测试声音',
+    soundOn: '声音已开启',
     birth: '出生日期',
     age: '年龄',
     years: '岁',
@@ -146,6 +182,15 @@ const controlText = {
     remaining: 'Tiempo restante',
     elapsed: 'Tiempo transcurrido',
     done: 'Completado',
+    countdown: 'Cuenta atrás',
+    clockAlarm: 'Alarma por hora',
+    alarmTime: 'Hora de alarma',
+    alarmReady: 'La alarma sonará a la hora seleccionada',
+    alarmPassed: 'Esa hora ya pasó hoy',
+    alarmRinging: 'Alarma sonando',
+    stopAlarm: 'Detener alarma',
+    testSound: 'Probar sonido',
+    soundOn: 'Sonido activado',
     birth: 'Fecha de nacimiento',
     age: 'Edad',
     years: 'años',
@@ -171,6 +216,15 @@ const controlText = {
     remaining: 'Temps restant',
     elapsed: 'Temps écoulé',
     done: 'Terminé',
+    countdown: 'Compte à rebours',
+    clockAlarm: 'Alarme horaire',
+    alarmTime: 'Heure de l’alarme',
+    alarmReady: 'L’alarme sonnera à l’heure choisie',
+    alarmPassed: 'Cette heure est déjà passée aujourd’hui',
+    alarmRinging: 'Alarme en cours',
+    stopAlarm: 'Arrêter l’alarme',
+    testSound: 'Tester le son',
+    soundOn: 'Son activé',
     birth: 'Date de naissance',
     age: 'Âge',
     years: 'ans',
@@ -186,6 +240,29 @@ const formatDuration = (totalSeconds) => {
   const minutes = Math.floor(safe / 60)
   const seconds = safe % 60
   return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+}
+
+const playAlarmSound = () => {
+  if (typeof window === 'undefined') return
+  const AudioContext = window.AudioContext || window.webkitAudioContext
+  if (!AudioContext) return
+  const context = new AudioContext()
+  const master = context.createGain()
+  master.gain.setValueAtTime(0.0001, context.currentTime)
+  master.gain.exponentialRampToValueAtTime(0.18, context.currentTime + 0.02)
+  master.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + 1.2)
+  master.connect(context.destination)
+
+  ;[0, 0.28, 0.56].forEach((offset) => {
+    const oscillator = context.createOscillator()
+    oscillator.type = 'sine'
+    oscillator.frequency.setValueAtTime(880, context.currentTime + offset)
+    oscillator.connect(master)
+    oscillator.start(context.currentTime + offset)
+    oscillator.stop(context.currentTime + offset + 0.18)
+  })
+
+  window.setTimeout(() => context.close(), 1400)
 }
 
 export default function UniversalTool({tool}) {
@@ -817,11 +894,25 @@ function LocalizedCountdownTool() {
   const [seconds, setSeconds] = useState('0')
   const [remaining, setRemaining] = useState(600)
   const [running, setRunning] = useState(false)
+  const [alarmTime, setAlarmTime] = useState('09:00')
+  const [alarmEnabled, setAlarmEnabled] = useState(false)
+  const [ringing, setRinging] = useState(false)
+  const [now, setNow] = useState(() => new Date())
   const total = Math.max(0, Math.floor(number(minutes) * 60 + number(seconds)))
+  const [alarmHours, alarmMinutes] = alarmTime.split(':').map((value) => Number(value))
+  const alarmTarget = new Date(now)
+  alarmTarget.setHours(Number.isFinite(alarmHours) ? alarmHours : 0, Number.isFinite(alarmMinutes) ? alarmMinutes : 0, 0, 0)
+  const alarmSeconds = Math.max(0, Math.ceil((alarmTarget.getTime() - now.getTime()) / 1000))
+  const alarmPassed = alarmTarget.getTime() <= now.getTime()
 
   useEffect(() => {
     if (!running) setRemaining(total)
   }, [running, total])
+
+  useEffect(() => {
+    const clock = setInterval(() => setNow(new Date()), 1000)
+    return () => clearInterval(clock)
+  }, [])
 
   useEffect(() => {
     if (!running) return undefined
@@ -830,6 +921,7 @@ function LocalizedCountdownTool() {
         if (current <= 1) {
           clearInterval(timer)
           setRunning(false)
+          setRinging(true)
           return 0
         }
         return current - 1
@@ -838,13 +930,34 @@ function LocalizedCountdownTool() {
     return () => clearInterval(timer)
   }, [running])
 
+  useEffect(() => {
+    if (!alarmEnabled || ringing) return
+    if (alarmSeconds <= 0) {
+      setAlarmEnabled(false)
+      setRinging(true)
+    }
+  }, [alarmEnabled, alarmSeconds, ringing])
+
+  useEffect(() => {
+    if (!ringing) return undefined
+    playAlarmSound()
+    const alarm = setInterval(playAlarmSound, 1800)
+    return () => clearInterval(alarm)
+  }, [ringing])
+
   const applyTime = () => {
     setRunning(false)
     setRemaining(total)
   }
 
+  const stopAlarm = () => {
+    setRinging(false)
+    setAlarmEnabled(false)
+  }
+
   return (
     <div className="card space-y-3">
+      <div className="text-xs font-bold uppercase tracking-wide text-slate-500">{t.countdown}</div>
       <div className="grid gap-3 sm:grid-cols-2">
         <Field label={t.minutes} value={minutes} onChange={setMinutes} />
         <Field label={t.seconds} value={seconds} onChange={setSeconds} />
@@ -853,8 +966,30 @@ function LocalizedCountdownTool() {
         <button className="btn-primary" onClick={() => setRunning((value) => remaining > 0 && !value)}>{running ? t.pause : t.start}</button>
         <button className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold" onClick={applyTime}>{t.set}</button>
         <button className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold" onClick={() => { setRunning(false); setRemaining(total) }}>{t.reset}</button>
+        <button className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold" onClick={playAlarmSound}>{t.testSound}</button>
       </div>
       <Result>{remaining === 0 ? t.done : t.remaining}: <b className="text-3xl">{formatDuration(remaining)}</b></Result>
+      <div className="mt-6 border-t border-slate-100 pt-5">
+        <div className="text-xs font-bold uppercase tracking-wide text-slate-500">{t.clockAlarm}</div>
+        <div className="mt-3 grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+          <Field label={t.alarmTime} type="time" value={alarmTime} onChange={(value) => { setAlarmTime(value); setAlarmEnabled(false); setRinging(false) }} />
+          <button className="btn-primary" onClick={() => { setRinging(false); setAlarmEnabled(!alarmPassed) }}>{t.set}</button>
+        </div>
+        <Result>
+          {ringing ? (
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <b>{t.alarmRinging}</b>
+              <button className="rounded-xl border border-emerald-200 bg-white px-4 py-2 text-sm font-semibold" onClick={stopAlarm}>{t.stopAlarm}</button>
+            </div>
+          ) : alarmEnabled ? (
+            <span>{t.alarmReady}: <b>{formatDuration(alarmSeconds)}</b></span>
+          ) : alarmPassed ? (
+            <span>{t.alarmPassed}</span>
+          ) : (
+            <span>{t.soundOn}</span>
+          )}
+        </Result>
+      </div>
     </div>
   )
 }
